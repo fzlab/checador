@@ -1,4 +1,4 @@
-const CACHE_NAME = 'checador-t0151-v1';
+const CACHE_NAME = 'checador-t0151-v1.1';
 const ASSETS_TO_CACHE = [
   './index.html',
   './src/fonts.css',
