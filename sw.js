@@ -1,11 +1,13 @@
-const CACHE_NAME = 'checador-t0151-v1.1';
+const CACHE_NAME = 'checador-t0151-v1.2';
 const ASSETS_TO_CACHE = [
   './index.html',
   './src/fonts.css',
   './src/fonts/Geist-Regular.ttf',
   './src/fonts/Geist-SemiBold.ttf',
   './src/icons/checador.svg',
-  './src/icons/checador-96.png',
+  './src/icons/checador512.png',
+  './src/icons/checador192.png',
+  './src/icons/checador180.png',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@1.72.0',
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
