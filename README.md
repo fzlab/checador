@@ -1,1 +1,0 @@
-# BoardTDA-supabase
