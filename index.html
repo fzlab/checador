@@ -7,8 +7,8 @@
   <title>Checador de Turnos - T0151</title>
   
   <!-- Iconos y PWA para iOS y Android -->
-<link rel="icon" type="image/svg+xml" href="./src/icons/checador.svg">
-<link rel="apple-touch-icon" href="./src/icons/checador180.png">
+  <link rel="icon" type="image/svg+xml" href="./src/icons/checador.svg">
+  <link rel="apple-touch-icon" href="./src/icons/checador180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Checador T0151">
@@ -350,24 +350,31 @@
         }[c]));
     }
 
+    function renderAvatarFallback(el, initial, sizeClass) {
+        if (!el || !el.parentElement) return;
+        const fallback = document.createElement('div');
+        fallback.className = `${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold uppercase shrink-0 shadow-sm`;
+        fallback.textContent = initial || '?';
+        el.parentElement.replaceChild(fallback, el);
+    }
+
     // ============================================================================
     // SUPABASE
     // ============================================================================
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
-    if (!window.supabase) {
-        console.error('[Supabase] SDK no disponible.');
-        throw new Error('Supabase SDK no disponible');
-    }
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
     // ============================================================================
-    // INDEXEDDB — COLA OFFLINE
+    // INDEXEDDB — COLA OFFLINE + CACHÉ DE DATOS
     // ============================================================================
     const DB_NAME = 'ChecadorOfflineDB';
-    const DB_VERSION = 1;
+    const DB_VERSION = 2;
     const STORE_PENDING = 'registros_pendientes';
+    const STORE_CACHE = 'cache_datos';
 
     function openOfflineDB() {
         return new Promise((resolve, reject) => {
@@ -378,6 +385,9 @@
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains(STORE_PENDING)) {
                     db.createObjectStore(STORE_PENDING, { keyPath: 'localId' });
+                }
+                if (!db.objectStoreNames.contains(STORE_CACHE)) {
+                    db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
                 }
             };
         });
@@ -411,6 +421,29 @@
             req.onsuccess = () => resolve();
             req.onerror = () => reject(req.error);
         });
+    }
+
+    async function setCachedData(key, value) {
+        try {
+            await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
+        } catch (err) {
+            console.warn('[Cache] No se pudo guardar en IndexedDB:', key, err);
+        }
+    }
+
+    async function getCachedData(key) {
+        try {
+            const db = await openOfflineDB();
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_CACHE, 'readonly');
+                const req = tx.objectStore(STORE_CACHE).get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                req.onerror = () => reject(req.error);
+            });
+        } catch (err) {
+            console.warn('[Cache] No se pudo leer de IndexedDB:', key, err);
+            return null;
+        }
     }
 
     // ============================================================================
@@ -453,6 +486,7 @@
     let activePopupTrigger = null;
     let isSyncing = false;
     let pendingBlobUrls = {};
+    let realtimeInitialized = false;
 
     const CHECK_TYPES = [
       { id: 'entry', label: 'Ingreso', icon: 'check', color: 'text-emerald-500' },
@@ -521,7 +555,7 @@
         iniciarRealtime();
       } catch (error) {
         console.error("Error al iniciar la app:", error);
-        document.getElementById('activeEmployeeName').textContent = "Error de conexión";
+        document.getElementById('activeEmployeeName').textContent = "Error local";
       }
     });
 
@@ -530,11 +564,25 @@
     // ============================================================================
     async function handleOnlineEvent() {
         updateSyncStatusUI();
+        iniciarRealtime();
+        if (employees.length === 0) {
+            await loadSession();
+        } else {
+            employees = await fetchEmployeesFromSupabase();
+            if (viewingUserId) {
+                updateUIForUser();
+                await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+            }
+        }
         setTimeout(() => processPendingQueue(), 800);
     }
 
     function handleOfflineEvent() {
         updateSyncStatusUI();
+        if (viewingUserId) {
+            loadTodayRecords();
+            loadWeeklySchedule();
+        }
     }
 
     // ============================================================================
@@ -542,7 +590,7 @@
     // ============================================================================
     async function processPendingQueue() {
         if (isSyncing) return;
-        if (!navigator.onLine) {
+        if (!navigator.onLine || !supabaseClient) {
             updateSyncStatusUI();
             return;
         }
@@ -560,11 +608,6 @@
 
         for (const item of pending) {
             try {
-                if (!employees.find(e => e.id === item.employeeId)) {
-                    await dbDelete(STORE_PENDING, item.localId);
-                    continue;
-                }
-
                 const fileName = `${item.employeeId}_${Date.now()}.jpg`;
                 const { error: uploadError } = await supabaseClient.storage
                     .from('registros-empleados')
@@ -631,7 +674,7 @@
             indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
             indicator.innerHTML = pendingCount > 0
                 ? `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}`
-                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión`;
+                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Modo sin conexión`;
             btnSync.classList.add('hidden');
         } else if (isSyncing) {
             syncBar.classList.remove('hidden');
@@ -706,60 +749,65 @@
     }
 
     // ============================================================================
-    // EMPLEADOS
+    // EMPLEADOS (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     async function fetchEmployeesFromSupabase() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('empleados')
-          .select('id, nombre, numero_empleado, foto_url, turnos')
-          .order('nombre', { ascending: true });
-        
-        if (error) {
-          console.warn("No se pudo conectar a la Nube:", error.message);
-          return [];
+      if (navigator.onLine && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('empleados')
+            .select('id, nombre, numero_empleado, foto_url, turnos')
+            .order('nombre', { ascending: true });
+          
+          if (!error && Array.isArray(data)) {
+            const mapped = data.map(emp => ({
+              id: emp.id,
+              name: emp.nombre,
+              number: String(emp.numero_empleado).trim(),
+              photoUrl: emp.foto_url || '',
+              turnos: emp.turnos || {}
+            }));
+            await setCachedData('empleados_list', mapped);
+            return mapped;
+          }
+          if (error) {
+            console.warn("No se pudo conectar a la Nube:", error.message);
+          }
+        } catch (err) {
+          console.warn("Error de red al consultar Minisers, usando caché:", err);
         }
-
-        if (data) {
-          return data.map(emp => ({
-            id: emp.id,
-            name: emp.nombre,
-            number: String(emp.numero_empleado).trim(),
-            photoUrl: emp.foto_url || '',
-            turnos: emp.turnos || {}
-          }));
-        }
-      } catch (err) {
-        console.warn("Error de red al consultar Minisers:", err);
       }
-      return [];
+
+      const cached = await getCachedData('empleados_list');
+      return Array.isArray(cached) ? cached : [];
     }
 
     async function loadSession() {
       employees = await fetchEmployeesFromSupabase();
-
-      if (employees.length === 0 && !navigator.onLine) {
-        document.getElementById('activeEmployeeName').textContent = "Sin conexión";
-        document.getElementById('currentDate').textContent = "Conéctate para cargar datos";
-        return;
-      }
-
-      if (employees.length === 0) {
-        document.getElementById('activeEmployeeName').textContent = "Sin Minisers";
-        document.getElementById('currentDate').textContent = "Verifica tu base de datos";
-        return;
-      }
-
       const savedSession = localStorage.getItem('sessionUserId');
-      
+
       if (savedSession && employees.some(e => e.id == savedSession)) {
         sessionUserId = Number(savedSession);
         viewingUserId = sessionUserId;
         updateUIForUser();
         await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-      } else {
-        openInitialUserModal();
+        return;
       }
+
+      if (employees.length > 0) {
+        openInitialUserModal();
+        return;
+      }
+
+      if (!navigator.onLine) {
+        document.getElementById('activeEmployeeName').textContent = "Sin conexión";
+        document.getElementById('assignedShiftText').textContent = "Turno asignado: Sin datos en caché";
+      } else {
+        document.getElementById('activeEmployeeName').textContent = "Sin Minisers";
+        document.getElementById('assignedShiftText').textContent = "Turno asignado: --";
+      }
+      renderRecordsUI();
+      renderWeeklySchedule();
     }
 
     function openInitialUserModal() {
@@ -767,12 +815,13 @@
       list.innerHTML = '';
 
       if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers registrados en la Nube.</p>';
+        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers en caché ni en la Nube.</p>';
       } else {
         employees.forEach(emp => {
+          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
           const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-12 h-12 rounded-full object-cover shrink-0 shadow-sm">` 
-            : `<div class="w-12 h-12 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${escapeHtml(emp.name.charAt(0))}</div>`;
+            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-12 h-12 text-sm')" class="w-12 h-12 rounded-full object-cover shrink-0 shadow-sm">` 
+            : `<div class="w-12 h-12 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${initial}</div>`;
 
           list.innerHTML += `
             <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-all flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
@@ -807,9 +856,10 @@
       const avatarEl = document.getElementById('activeEmployeeAvatar');
       
       if (user) {
+        const initial = escapeHtml(user.name ? user.name.charAt(0) : '?');
         const avatar = user.photoUrl 
-          ? `<img src="${escapeHtml(user.photoUrl)}" class="w-11 h-11 rounded-full object-cover shrink-0 shadow-sm">` 
-          : `<div class="w-11 h-11 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${escapeHtml(user.name.charAt(0))}</div>`;
+          ? `<img src="${escapeHtml(user.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-11 h-11 text-sm')" class="w-11 h-11 rounded-full object-cover shrink-0 shadow-sm">` 
+          : `<div class="w-11 h-11 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${initial}</div>`;
         
         avatarEl.innerHTML = avatar;
         nameEl.textContent = user.name;
@@ -864,19 +914,24 @@
     }
 
     // ============================================================================
-    // REGISTROS DEL DÍA
+    // REGISTROS DEL DÍA (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     async function loadTodayRecords() {
-      if (!viewingUserId) return;
+      if (!viewingUserId) {
+        todayRecords = [];
+        renderRecordsUI();
+        return;
+      }
 
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const cacheKey = `today_${viewingUserId}_${todayStr}`;
 
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = [];
-      if (navigator.onLine) {
+      let serverRecords = null;
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -885,7 +940,7 @@
             .eq('fecha', todayStr)
             .order('timestamp', { ascending: true });
 
-          if (!error && data) {
+          if (!error && Array.isArray(data)) {
             serverRecords = data.map(r => ({
               id: r.id,
               employeeId: r.employee_id,
@@ -897,10 +952,16 @@
               ocrDate: r.ocr_fecha,
               isPending: false
             }));
+            await setCachedData(cacheKey, serverRecords);
           }
         } catch (err) {
           console.error("Excepción al consultar registros del día:", err);
         }
+      }
+
+      if (!Array.isArray(serverRecords)) {
+        const cached = await getCachedData(cacheKey);
+        serverRecords = Array.isArray(cached) ? cached : [];
       }
 
       const pendingToday = pendingRecords
@@ -937,8 +998,8 @@
           await loadWeeklySchedule();
         }
       } else {
-        if (!navigator.onLine) {
-          alert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
+        if (!navigator.onLine || !supabaseClient) {
+          alert('Sin conexión. No se puede eliminar un registro ya subido hasta recuperar la conexión.');
           return;
         }
         if (confirm('¿Deseas eliminar este registro de la nube?')) {
@@ -991,7 +1052,7 @@
 
       CHECK_TYPES.forEach((type, index) => {
         const record = todayRecords.find(r => r.type === type.id);
-        const canRegister = !record;
+        const canRegister = !record && Boolean(viewingUserId);
         const isPending = record && record.isPending;
 
         let leftIcon;
@@ -1008,7 +1069,7 @@
         let rightAction;
         if (record) {
           rightAction = `<div class="relative flex items-center gap-2">
-               <img src="${imgSrc}" onclick="viewPhoto('${record.id}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
+               <img src="${imgSrc}" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
                ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
              </div>`;
         } else if (canRegister) {
@@ -1079,7 +1140,7 @@
     }
 
     // ============================================================================
-    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN
+    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     function getWeekData(offset) {
       const now = new Date();
@@ -1214,17 +1275,22 @@
 
     async function loadWeeklySchedule() {
       const targetUserId = sessionUserId || viewingUserId;
-      if (!targetUserId) return;
+      if (!targetUserId) {
+        weekRecords = [];
+        renderWeeklySchedule();
+        return;
+      }
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
       const endStr = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,'0')}-${String(sunday.getDate()).padStart(2,'0')}`;
+      const cacheKey = `week_${targetUserId}_${startStr}_${endStr}`;
 
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = [];
-      if (navigator.onLine) {
+      let serverRecords = null;
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -1234,7 +1300,7 @@
             .lte('fecha', endStr)
             .order('timestamp', { ascending: true });
 
-          if (!error && data) {
+          if (!error && Array.isArray(data)) {
             serverRecords = data.map(r => ({
               id: r.id,
               employeeId: r.employee_id,
@@ -1243,10 +1309,16 @@
               date: r.fecha,
               isPending: false
             }));
+            await setCachedData(cacheKey, serverRecords);
           }
         } catch (err) {
           console.error("Excepción al consultar registros semanales:", err);
         }
+      }
+
+      if (!Array.isArray(serverRecords)) {
+        const cached = await getCachedData(cacheKey);
+        serverRecords = Array.isArray(cached) ? cached : [];
       }
 
       const pendingInRange = pendingRecords
@@ -1270,7 +1342,7 @@
       const targetUserId = sessionUserId || viewingUserId;
       const emp = employees.find(e => e.id === targetUserId);
       const container = document.getElementById('weeklyScheduleContainer');
-      if (!emp || !container) return;
+      if (!container) return;
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const options = { day: 'numeric', month: 'short' };
@@ -1291,6 +1363,11 @@
         btnPrev.disabled = true;
         btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
         btnNext.disabled = false;
+      }
+
+      if (!emp) {
+        container.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-4">Sin horarios disponibles sin conexión.</p>';
+        return;
       }
 
       const empTurnos = emp.turnos || {};
@@ -1553,7 +1630,7 @@
         loaderText.textContent = "Comprimiendo imagen...";
         imageBlob = await resizeImage(file);
 
-        if (navigator.onLine) {
+        if (navigator.onLine && typeof Tesseract !== 'undefined') {
           loaderText.textContent = "Analizando con OCR...";
           try {
             const reader = new FileReader();
@@ -1611,7 +1688,7 @@
       const localDateStr = `${exactNow.getFullYear()}-${String(exactNow.getMonth()+1).padStart(2,'0')}-${String(exactNow.getDate()).padStart(2,'0')}`;
       const localId = `local_${viewingUserId}_${Date.now()}_${type}`;
 
-      if (!navigator.onLine) {
+      if (!navigator.onLine || !supabaseClient) {
         await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
         return;
       }
@@ -1729,16 +1806,20 @@
     }
 
     async function openSwitchUserModal() {
+      if (employees.length === 0) {
+        employees = await fetchEmployeesFromSupabase();
+      }
       const list = document.getElementById('switchUserList');
       list.innerHTML = '';
       
       if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay Minisers registrados en el sistema.</p>';
+        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay Minisers disponibles.</p>';
       } else {
         employees.forEach(emp => {
+          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
           const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-10 h-10 rounded-full object-cover shrink-0">` 
-            : `<div class="w-10 h-10 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">${escapeHtml(emp.name.charAt(0))}</div>`;
+            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-10 h-10 text-xs')" class="w-10 h-10 rounded-full object-cover shrink-0">` 
+            : `<div class="w-10 h-10 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">${initial}</div>`;
 
           list.innerHTML += `
             <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
@@ -1771,6 +1852,7 @@
     // REALTIME
     // ============================================================================
     function iniciarRealtime() {
+      if (realtimeInitialized || !navigator.onLine || !supabaseClient) return;
       try {
         supabaseClient
           .channel('checador-realtime')
@@ -1782,6 +1864,7 @@
             }
           })
           .subscribe();
+        realtimeInitialized = true;
       } catch (err) {
         console.warn('Realtime no disponible:', err);
       }
