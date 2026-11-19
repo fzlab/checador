@@ -1,7 +1,9 @@
-const CACHE_NAME = 'checador-t0151-v1.2';
+const CACHE_NAME = 'checador-t0151-v1.3';
 const ASSETS_TO_CACHE = [
+  './',
   './index.html',
-  './src/fonts.css',
+  './manifest.json',
+  './src/fonts/fonts.css',
   './src/fonts/Geist-Regular.ttf',
   './src/fonts/Geist-SemiBold.ttf',
   './src/icons/checador.svg',
@@ -15,52 +17,54 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
-// Instalación del Service Worker y almacenamiento en caché estático
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const url of ASSETS_TO_CACHE) {
+        try {
+          const req = new Request(url, { cache: 'reload' });
+          const res = await fetch(req);
+          if (res && (res.ok || res.type === 'opaque')) {
+            await cache.put(url, res);
+          }
+        } catch (err) {
+          console.warn('[SW] No se pudo precachear:', url, err);
+        }
+      }
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activación y limpieza de cachés antiguos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-// Estrategia de red con respaldo en caché (Network First / Stale While Revalidate)
 self.addEventListener('fetch', (event) => {
-  // Ignorar peticiones que no sean GET o que provengan de Supabase/Storage (para evitar interferir con la sincronización offline)
   if (event.request.method !== 'GET' || event.request.url.includes('supabase.co')) {
     return;
   }
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Si la respuesta es válida, clonarla y actualizar la caché
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Si falla la red, buscar en la caché
-        return caches.match(event.request);
-      })
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request)
+        .then((response) => {
+          if (response && (response.status === 200 || response.type === 'opaque')) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => cached);
+
+      return cached || networkFetch;
+    })
   );
 });
