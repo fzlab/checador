@@ -809,17 +809,32 @@
       window.addEventListener('offline', handleOfflineEvent);
 
       try {
-        pendingRecords = await dbGetAll(STORE_PENDING);
-        cleanupOrphanBlobUrls();
-        updateSyncStatusUI();
+        // 1. En DOMContentLoaded, después de cargar pendingRecords:
+pendingRecords = await dbGetAll(STORE_PENDING);
+cleanupOrphanBlobUrls();
+updateSyncStatusUI();
 
-        await loadSession();
-        iniciarRealtime();
+await loadSession();
+iniciarRealtime();
+
+if (navigator.onLine && pendingRecords.length > 0) {
+  setTimeout(() => processPendingQueue(), 500);
+}
+
+// También reintentar cuando la PWA vuelva a primer plano
+      // También reintentar cuando la PWA vuelva a primer plano
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
+          processPendingQueue();
+        }
+      });
       } catch (error) {
         console.error("Error al iniciar la app:", error);
         document.getElementById('activeEmployeeName').textContent = "Error local";
       }
     });
+
+
 
     // ============================================================================
     // HANDLERS ONLINE / OFFLINE
@@ -868,40 +883,43 @@
 
         let successCount = 0;
 
-        for (const item of pending) {
-            try {
-                const fileName = `${item.employeeId}_${Date.now()}.jpg`;
-                const { error: uploadError } = await supabaseClient.storage
-                    .from('registros-empleados')
-                    .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
+// 2. En processPendingQueue(), registrar el error exacto si Supabase rechaza la subida/inserción:
+for (const item of pending) {
+  try {
+    const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from('registros-empleados')
+      .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
 
-                if (uploadError) throw uploadError;
+    if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
 
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('registros-empleados')
-                    .getPublicUrl(fileName);
+    const { data: publicUrlData } = supabaseClient.storage
+      .from('registros-empleados')
+      .getPublicUrl(fileName);
 
-                const { error: insertError } = await supabaseClient
-                    .from('registros')
-                    .insert([{
-                        employee_id: item.employeeId,
-                        tipo: item.type,
-                        timestamp: item.timestamp,
-                        fecha: item.date,
-                        foto_url: publicUrlData.publicUrl,
-                        ocr_nombre: item.ocrName || null,
-                        ocr_fecha: item.ocrDate || null
-                    }]);
+    const { error: insertError } = await supabaseClient
+      .from('registros')
+      .insert([{
+        employee_id: item.employeeId,
+        tipo: item.type,
+        timestamp: item.timestamp,
+        fecha: item.date,
+        foto_url: publicUrlData.publicUrl,
+        ocr_nombre: item.ocrName || null,
+        ocr_fecha: item.ocrDate || null
+      }]);
 
-                if (insertError) throw insertError;
+    if (insertError) throw new Error(`DB insert: ${insertError.message}`);
 
-                await dbDelete(STORE_PENDING, item.localId);
-                successCount++;
+    await dbDelete(STORE_PENDING, item.localId);
+    successCount++;
+  } catch (err) {
+    console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
+    item.lastError = err?.message || String(err);
+    await dbPut(STORE_PENDING, item);
+  }
+}
 
-            } catch (err) {
-                console.error('[Sync] Error sincronizando pendiente:', err);
-            }
-        }
 
         isSyncing = false;
         await refreshPendingRecords();
