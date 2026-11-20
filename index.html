@@ -198,18 +198,18 @@
         inset 0 1.5px 2px rgba(255, 255, 255, 0.55);
     }
 
-    /* Botones Liquid Glass Púrpura Suave con Brillo Especular */
+    /* Botones Liquid Glass Azul/Púrpura Suave con Brillo Especular */
     .liquid-btn-primary {
       position: relative;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 20%, rgba(216, 196, 255, 0.92) 0%, rgba(168, 139, 250, 0.82) 55%, rgba(139, 108, 246, 0.88) 100%);
+      background: radial-gradient(circle at 50% 20%, rgba(196, 210, 255, 0.92) 0%, rgba(155, 160, 250, 0.84) 55%, rgba(129, 140, 248, 0.90) 100%);
       color: #FFFFFF;
-      border: 1.5px solid rgba(233, 213, 255, 0.95);
+      border: 1.5px solid rgba(224, 231, 255, 0.95);
       box-shadow:
-        0 8px 20px -4px rgba(139, 108, 246, 0.34),
+        0 8px 20px -4px rgba(99, 120, 230, 0.30),
         inset 0 2px 3px rgba(255, 255, 255, 0.85),
-        inset 0 -3px 6px rgba(109, 77, 224, 0.25);
-      text-shadow: 0 1px 2px rgba(88, 60, 185, 0.25);
+        inset 0 -3px 6px rgba(79, 90, 200, 0.22);
+      text-shadow: 0 1px 2px rgba(60, 70, 160, 0.22);
       transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }
     .liquid-btn-primary::before {
@@ -223,20 +223,20 @@
     .liquid-btn-primary:hover {
       filter: brightness(1.03);
       box-shadow:
-        0 10px 24px -4px rgba(139, 108, 246, 0.42),
+        0 10px 24px -4px rgba(99, 120, 230, 0.38),
         inset 0 2px 4px rgba(255, 255, 255, 0.92),
-        inset 0 -3px 6px rgba(109, 77, 224, 0.25);
+        inset 0 -3px 6px rgba(79, 90, 200, 0.22);
     }
     .liquid-btn-primary:active {
       transform: scale(0.96);
     }
     .dark .liquid-btn-primary {
-      background: radial-gradient(circle at 50% 20%, rgba(196, 181, 253, 0.78) 0%, rgba(139, 92, 246, 0.72) 58%, rgba(109, 40, 217, 0.82) 100%);
-      border: 1.5px solid rgba(216, 180, 254, 0.55);
+      background: radial-gradient(circle at 50% 20%, rgba(165, 180, 250, 0.78) 0%, rgba(120, 130, 230, 0.74) 58%, rgba(90, 100, 210, 0.84) 100%);
+      border: 1.5px solid rgba(199, 210, 254, 0.55);
       box-shadow:
-        0 8px 22px -4px rgba(109, 40, 217, 0.45),
+        0 8px 22px -4px rgba(60, 70, 180, 0.42),
         inset 0 1.5px 2px rgba(255, 255, 255, 0.5),
-        inset 0 -3px 6px rgba(59, 7, 100, 0.35);
+        inset 0 -3px 6px rgba(30, 40, 120, 0.32);
     }
 
     /* Orbes de luz pastel ambiental */
@@ -261,6 +261,180 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .pending-pulse { animation: pendingPulse 1.8s ease-in-out infinite; }
     @keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+
+    /* =====================================================================
+       REDISEÑO GLOBAL DE BOTONES — LIQUID GLASS AZUL / PÚRPURA SUAVE
+       Solo presentación: no modifica eventos, IDs ni comportamiento.
+       Tonalidades sutiles que armonizan con el fondo azul-lavanda.
+       ===================================================================== */
+    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary) {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,.80) 0%,
+        rgba(230,238,255,.70) 48%,
+        rgba(236,230,255,.74) 100%);
+      color: #4F5BC7;
+      border: 1px solid rgba(255,255,255,.90);
+      -webkit-backdrop-filter: blur(18px) saturate(175%);
+      backdrop-filter: blur(18px) saturate(175%);
+      box-shadow:
+        0 5px 16px rgba(99,120,200,.12),
+        0 0 12px rgba(139,140,230,.08),
+        inset 0 1.5px 2px rgba(255,255,255,.96),
+        inset 0 -1px 3px rgba(140,150,220,.10);
+      text-shadow: 0 1px 1px rgba(255,255,255,.40);
+      transition: transform .18s ease, box-shadow .22s ease,
+        background .22s ease, filter .22s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary)::before {
+      content: "";
+      position: absolute;
+      inset: 1.5px;
+      z-index: -1;
+      border-radius: inherit;
+      border: 1px solid rgba(255,255,255,.50);
+      pointer-events: none;
+    }
+
+    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):hover {
+      filter: brightness(1.035) saturate(1.06);
+      box-shadow:
+        0 7px 20px rgba(99,120,200,.18),
+        0 0 16px rgba(139,140,230,.14),
+        inset 0 1.5px 2px rgba(255,255,255,1),
+        inset 0 -1px 3px rgba(140,150,220,.12);
+    }
+
+    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):active {
+      transform: scale(.965);
+      box-shadow:
+        0 2px 8px rgba(99,120,200,.14),
+        inset 0 2px 5px rgba(120,130,200,.12);
+    }
+
+    /* Acciones principales: cápsula luminosa azul-púrpura suave. */
+    button.liquid-btn-primary,
+    .liquid-btn-primary {
+      background: linear-gradient(112deg,
+        rgba(186,200,255,.96) 0%,
+        rgba(139,150,245,.94) 48%,
+        rgba(155,140,250,.96) 100%);
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,.85);
+      -webkit-backdrop-filter: blur(18px) saturate(190%);
+      backdrop-filter: blur(18px) saturate(190%);
+      box-shadow:
+        0 7px 20px rgba(100,120,220,.26),
+        0 0 16px rgba(130,140,235,.18),
+        inset 0 2px 3px rgba(255,255,255,.80),
+        inset 0 -3px 6px rgba(80,90,190,.16);
+      text-shadow: 0 1px 3px rgba(50,60,140,.24);
+    }
+
+    button.liquid-btn-primary::before,
+    .liquid-btn-primary::before {
+      border-color: rgba(255,255,255,.45);
+    }
+
+    button.liquid-btn-primary:hover,
+    .liquid-btn-primary:hover {
+      filter: brightness(1.05) saturate(1.06);
+      box-shadow:
+        0 9px 25px rgba(100,120,220,.34),
+        0 0 20px rgba(130,140,235,.24),
+        inset 0 2px 4px rgba(255,255,255,.90),
+        inset 0 -3px 6px rgba(80,90,190,.18);
+    }
+
+    /* Acciones destructivas: cristal rosa suave, sin cambiar su función. */
+    button[onclick*="delete"],
+    button[onclick*="confirmRefresh"] {
+      background: linear-gradient(120deg,
+        rgba(255,200,220,.90), rgba(244,140,190,.86)) !important;
+      color: #8F285F !important;
+      border: 1px solid rgba(255,255,255,.82) !important;
+      box-shadow: 0 6px 17px rgba(222,74,151,.17),
+        inset 0 1.5px 2px rgba(255,255,255,.88) !important;
+      text-shadow: none;
+    }
+
+    /* Navegación de semana y botones de icono: cristal azul-púrpura suave. */
+    #btnPrevWeek, #btnNextWeek,
+    button[onclick="closeAll()"]:not(.w-full) {
+      background: linear-gradient(135deg,
+        rgba(255,255,255,.80), rgba(230,238,255,.70), rgba(236,230,255,.74));
+      color: #5B63C7;
+    }
+
+    button:disabled,
+    button[disabled] {
+      opacity: .42;
+      filter: saturate(.55);
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,.55) !important;
+    }
+
+    /* Los chips conservan sus colores de estado (a tiempo / retardo / pendiente). */
+    button.record-chip-clickable {
+      border: 1px solid rgba(255,255,255,.58);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.38),
+        0 2px 6px rgba(90,110,180,.08);
+      transition: transform .16s ease, filter .16s ease;
+    }
+    button.record-chip-clickable:active { transform: scale(.96); }
+
+    /* Modo oscuro: cristal legible con reflejos azul-púrpura suaves. */
+    .dark button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):not(.liquid-btn-primary) {
+      background: linear-gradient(135deg,
+        rgba(70,80,140,.62) 0%,
+        rgba(80,70,145,.58) 52%,
+        rgba(90,75,150,.55) 100%);
+      color: #E8ECFF;
+      border-color: rgba(190,200,255,.28);
+      box-shadow:
+        0 6px 18px rgba(8,10,30,.28),
+        0 0 14px rgba(110,120,220,.12),
+        inset 0 1.5px 2px rgba(255,255,255,.18),
+        inset 0 -2px 4px rgba(10,12,30,.14);
+      text-shadow: 0 1px 2px rgba(0,0,0,.16);
+    }
+
+    .dark button.liquid-btn-primary,
+    .dark .liquid-btn-primary {
+      background: linear-gradient(112deg,
+        rgba(140,155,240,.94) 0%,
+        rgba(115,125,220,.94) 48%,
+        rgba(130,120,235,.94) 100%);
+      color: #fff;
+      border-color: rgba(200,210,255,.48);
+      box-shadow: 0 8px 22px rgba(70,80,180,.36),
+        0 0 16px rgba(120,130,230,.18),
+        inset 0 1.5px 2px rgba(255,255,255,.34);
+    }
+
+    .dark button[onclick*="delete"],
+    .dark button[onclick*="confirmRefresh"] {
+      background: linear-gradient(120deg, rgba(180,70,130,.70), rgba(145,50,110,.74)) !important;
+      color: #FFEAF4 !important;
+      border-color: rgba(255,190,220,.32) !important;
+    }
+
+    .dark button.record-chip-clickable {
+      border-color: rgba(255,255,255,.16);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary) {
+        transition: none;
+      }
+    }
+
   </style>
 </head>
 <body class="h-full text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-300">
