@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="min-h-dvh">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="./src/fonts/fonts.css">
@@ -36,12 +36,13 @@
 
   <style>
     ::-webkit-scrollbar { display: none; }
-    html, body {
+    html {
       min-height: 100dvh;
-      overflow-x: hidden;
-      overscroll-behavior-y: none;
+      overflow-x: clip;
     }
     body {
+      min-height: 100dvh;
+      overflow-x: clip;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -62,7 +63,7 @@
     @keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   </style>
 </head>
-<body class="min-h-dvh bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans antialiased relative transition-colors duration-200">
+<body class="bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans antialiased relative transition-colors duration-200">
 
   <div id="overlay" onclick="closeAll()" class="fixed inset-0 z-40 blur-overlay transition-opacity duration-200 hidden"></div>
 
@@ -95,7 +96,7 @@
     </div>
   </div>
 
-  <div class="main-content min-h-dvh flex flex-col pb-10">
+  <div class="main-content flex flex-col pb-10">
     
     <header class="ios-header px-5 pb-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
       <div class="flex items-center space-x-3">
