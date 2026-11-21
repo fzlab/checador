@@ -4,23 +4,18 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="./src/fonts/fonts.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Checador de Turnos - T0151</title>
-  
-  <!-- Iconos y PWA para iOS y Android -->
+  <title>Checador Minisers - T0151</title>
   <link rel="icon" type="image/svg+xml" href="./src/icons/checador.svg">
-  <link rel="apple-touch-icon" href="./src/icons/checador180.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Checador T0151">
   <link rel="manifest" href="./manifest.json">
-
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="theme-color" content="#E8EFFD">
-  
+  <meta name="theme-color" content="#F8F9FA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" sizes="180x180" href="./src/icons/checador180.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@1.72.0"></script>
-  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- html2canvas para descargar la tarjeta de horarios del empleado -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -31,22 +26,8 @@
         extend: {
           fontFamily: { sans: ['Geist', 'sans-serif'] },
           colors: {
-            app: { 
-              bg: '#E8EFFD', 
-              card: 'rgba(255, 255, 255, 0.55)', 
-              border: 'rgba(255, 255, 255, 0.65)', 
-              title: '#1E293B', 
-              sub: '#64748B', 
-              brand: '#8B6CF6', 
-              accent: '#F3EEFF' 
-            },
-            darkapp: { 
-              bg: '#13182B', 
-              card: 'rgba(30, 41, 70, 0.55)', 
-              border: 'rgba(255, 255, 255, 0.14)', 
-              title: '#F8FAFC', 
-              sub: '#94A3B8' 
-            }
+            app: { bg: '#F8F9FA', card: '#FFFFFF', border: '#E5E7EB', title: '#111827', sub: '#6B7280', brand: '#0D9488', accent: '#E6F6F4' },
+            darkapp: { bg: '#0F172A', card: '#1E293B', border: '#334155', title: '#F8FAFC', sub: '#94A3B8' }
           }
         }
       }
@@ -55,431 +36,36 @@
 
   <style>
     ::-webkit-scrollbar { display: none; }
-    body { 
-      -webkit-tap-highlight-color: transparent; 
-      user-select: none;
-      background: linear-gradient(135deg, #E2ECFC 0%, #EDE7FC 48%, #E0F2FE 100%);
-    }
-    .dark body {
-      background: linear-gradient(135deg, #11162B 0%, #1C1938 50%, #122238 100%);
-    }
+    body { -webkit-tap-highlight-color: transparent; user-select: none; }
     input { user-select: text; }
-
-    /* Capas Liquid Glass */
-    .liquid-glass {
-      background: rgba(255, 255, 255, 0.56);
-      backdrop-filter: blur(4px) saturate(185%);
-      -webkit-backdrop-filter: blur(24px) saturate(185%);
-      border: 1px solid rgba(255, 255, 255, 0.72);
-      box-shadow: 
-        0 10px 30px -5px rgba(99, 115, 171, 0.12),
-        inset 0 1px 1px rgba(255, 255, 255, 0.9);
-    }
-    .dark .liquid-glass {
-      background: rgba(26, 34, 60, 0.56);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 
-        0 10px 30px -5px rgba(5, 8, 20, 0.45),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15);
-    }
-
-    /* Fondo Liquid Glass Cristalino para Modales de Selección */
-    .liquid-modal-backdrop {
-      background: radial-gradient(circle at 50% 25%, rgba(237, 233, 254, 0.68) 0%, rgba(219, 234, 254, 0.58) 55%, rgba(224, 231, 255, 0.66) 100%);
-      backdrop-filter: blur(5px) saturate(175%);
-      -webkit-backdrop-filter: blur(5px) saturate(175%);
-    }
-    .dark .liquid-modal-backdrop {
-      background: radial-gradient(circle at 50% 25%, rgba(30, 27, 75, 0.72) 0%, rgba(15, 23, 42, 0.68) 60%, rgba(19, 24, 43, 0.76) 100%);
-      backdrop-filter: blur(5px) saturate(165%);
-      -webkit-backdrop-filter: blur(5px) saturate(165%);
-    }
-
-    .liquid-modal-sheet {
-      background: rgba(255, 255, 255, 0.78);
-      backdrop-filter: blur(5px) saturate(190%);
-      -webkit-backdrop-filter: blur(5px) saturate(190%);
-      border: 1.5px solid rgba(255, 255, 255, 0.92);
-      box-shadow:
-        0 20px 45px -10px rgba(76, 29, 149, 0.16),
-        0 8px 20px -6px rgba(100, 116, 175, 0.12),
-        inset 0 1.5px 2px rgba(255, 255, 255, 1);
-    }
-    .dark .liquid-modal-sheet {
-      background: rgba(28, 36, 62, 0.82);
-      border: 1.5px solid rgba(255, 255, 255, 0.18);
-      box-shadow:
-        0 20px 45px -10px rgba(2, 6, 23, 0.65),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.16);
-    }
-
-    /* Menú Desplegable Glassmorphism (Blanco, Gris y toques de Rojo) */
-    .glass-dropdown {
-      background: rgba(255, 255, 255, 0.84);
-      backdrop-filter: blur(5px) saturate(170%);
-      -webkit-backdrop-filter: blur(5px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      box-shadow:
-        0 14px 32px -8px rgba(71, 85, 105, 0.18),
-        0 4px 12px -2px rgba(148, 163, 184, 0.12),
-        inset 0 1px 1px rgba(255, 255, 255, 1);
-    }
-    .dark .glass-dropdown {
-      background: rgba(30, 36, 52, 0.86);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow:
-        0 14px 32px -8px rgba(2, 6, 23, 0.55),
-        0 4px 12px -2px rgba(15, 23, 42, 0.35),
-        inset 0 1px 1px rgba(255, 255, 255, 0.14);
-    }
-
-    .liquid-card {
-      background: rgba(255, 255, 255, 0.45);
-      backdrop-filter: blur(5px) saturate(165%);
-      -webkit-backdrop-filter: blur(5px) saturate(165%);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      box-shadow: 
-        0 6px 20px -4px rgba(100, 116, 175, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    }
-    .dark .liquid-card {
-      background: rgba(30, 40, 72, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 
-        0 6px 20px -4px rgba(5, 8, 20, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .liquid-pill {
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 2px 8px rgba(139, 108, 246, 0.08), inset 0 1px 0 rgba(255,255,255,0.95);
-    }
-    .dark .liquid-pill {
-      background: rgba(40, 52, 92, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.12);
-    }
-
-    /* Toggle Glassmorphism Azul Sereno */
-    .glass-toggle {
-      background: linear-gradient(135deg, rgba(219, 234, 254, 0.78) 0%, rgba(191, 219, 254, 0.52) 100%);
-      backdrop-filter: blur(16px) saturate(160%);
-      -webkit-backdrop-filter: blur(16px) saturate(160%);
-      border: 1.5px solid rgba(255, 255, 255, 0.85);
-      box-shadow:
-        0 6px 18px -4px rgba(96, 165, 250, 0.28),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
-        inset 0 -2px 4px rgba(147, 197, 253, 0.35);
-    }
-    .dark .glass-toggle {
-      background: linear-gradient(135deg, rgba(30, 58, 95, 0.72) 0%, rgba(23, 37, 68, 0.68) 100%);
-      border: 1.5px solid rgba(147, 197, 253, 0.28);
-      box-shadow:
-        0 6px 18px -4px rgba(15, 23, 42, 0.55),
-        inset 0 1.5px 1.5px rgba(186, 230, 253, 0.22),
-        inset 0 -2px 4px rgba(15, 23, 42, 0.45);
-    }
-
-    .glass-toggle-thumb {
-      background: radial-gradient(circle at 30% 28%, #93C5FD 0%, #60A5FA 62%, #3B82F6 100%);
-      border: 1.5px solid rgba(255, 255, 255, 0.85);
-      box-shadow:
-        0 3px 10px rgba(59, 130, 246, 0.35),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.65);
-    }
-    .dark .glass-toggle-thumb {
-      background: radial-gradient(circle at 30% 28%, #7DD3FC 0%, #38BDF8 60%, #2563EB 100%);
-      border: 1.5px solid rgba(224, 242, 254, 0.65);
-      box-shadow:
-        0 3px 12px rgba(37, 99, 235, 0.45),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.55);
-    }
-
-    /* Botones Liquid Glass Azul/Púrpura Suave con Brillo Especular */
-    .liquid-btn-primary {
-      position: relative;
-      overflow: hidden;
-      background: radial-gradient(circle at 50% 20%, rgba(196, 210, 255, 0.92) 0%, rgba(155, 160, 250, 0.84) 55%, rgba(129, 140, 248, 0.90) 100%);
-      color: #FFFFFF;
-      border: 1.5px solid rgba(224, 231, 255, 0.95);
-      box-shadow:
-        0 8px 20px -4px rgba(99, 120, 230, 0.30),
-        inset 0 2px 3px rgba(255, 255, 255, 0.85),
-        inset 0 -3px 6px rgba(79, 90, 200, 0.22);
-      text-shadow: 0 1px 2px rgba(60, 70, 160, 0.22);
-      transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
-    }
-    .liquid-btn-primary::before {
-      content: "";
-      position: absolute;
-      inset: 2px;
-      border-radius: inherit;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      pointer-events: none;
-    }
-    .liquid-btn-primary:hover {
-      filter: brightness(1.03);
-      box-shadow:
-        0 10px 24px -4px rgba(99, 120, 230, 0.38),
-        inset 0 2px 4px rgba(255, 255, 255, 0.92),
-        inset 0 -3px 6px rgba(79, 90, 200, 0.22);
-    }
-    .liquid-btn-primary:active {
-      transform: scale(0.96);
-    }
-    .dark .liquid-btn-primary {
-      background: radial-gradient(circle at 50% 20%, rgba(165, 180, 250, 0.78) 0%, rgba(120, 130, 230, 0.74) 58%, rgba(90, 100, 210, 0.84) 100%);
-      border: 1.5px solid rgba(199, 210, 254, 0.55);
-      box-shadow:
-        0 8px 22px -4px rgba(60, 70, 180, 0.42),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.5),
-        inset 0 -3px 6px rgba(30, 40, 120, 0.32);
-    }
-
-    /* Orbes de luz pastel ambiental */
-    .ambient-orb {
-      position: fixed;
-      border-radius: 9999px;
-      filter: blur(75px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.75;
-    }
-
-    .blur-overlay { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); background-color: rgba(148, 163, 184, 0.22); }
-    .dark .blur-overlay { background-color: rgba(15, 23, 42, 0.35); }
-    .fade-in { animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .slide-up { animation: slideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    
-    .loader { border: 4px solid rgba(139, 108, 246, 0.2); border-top: 4px solid #9F7AEA; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
-    .dark .loader { border: 4px solid rgba(167, 139, 250, 0.22); border-top: 4px solid #C4B5FD; }
+    .blur-overlay { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.5); }
+    .fade-in { animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .slide-up { animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #0D9488; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
+    .dark .loader { border: 4px solid #334155; border-top: 4px solid #2DD4BF; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .pending-pulse { animation: pendingPulse 1.8s ease-in-out infinite; }
-    @keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
-
-
-    /* =====================================================================
-       REDISEÑO GLOBAL DE BOTONES — LIQUID GLASS AZUL / PÚRPURA SUAVE
-       Solo presentación: no modifica eventos, IDs ni comportamiento.
-       Tonalidades sutiles que armonizan con el fondo azul-lavanda.
-       ===================================================================== */
-    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary) {
-      position: relative;
-      isolation: isolate;
-      overflow: hidden;
-      background: linear-gradient(135deg,
-        rgba(255,255,255,.80) 0%,
-        rgba(230,238,255,.70) 48%,
-        rgba(236,230,255,.74) 100%);
-      color: #4F5BC7;
-      border: 1px solid rgba(255,255,255,.90);
-      -webkit-backdrop-filter: blur(18px) saturate(175%);
-      backdrop-filter: blur(18px) saturate(175%);
-      box-shadow:
-        0 5px 16px rgba(99,120,200,.12),
-        0 0 12px rgba(139,140,230,.08),
-        inset 0 1.5px 2px rgba(255,255,255,.96),
-        inset 0 -1px 3px rgba(140,150,220,.10);
-      text-shadow: 0 1px 1px rgba(255,255,255,.40);
-      transition: transform .18s ease, box-shadow .22s ease,
-        background .22s ease, filter .22s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary)::before {
-      content: "";
-      position: absolute;
-      inset: 1.5px;
-      z-index: -1;
-      border-radius: inherit;
-      border: 1px solid rgba(255,255,255,.50);
-      pointer-events: none;
-    }
-
-    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):hover {
-      filter: brightness(1.035) saturate(1.06);
-      box-shadow:
-        0 7px 20px rgba(99,120,200,.18),
-        0 0 16px rgba(139,140,230,.14),
-        inset 0 1.5px 2px rgba(255,255,255,1),
-        inset 0 -1px 3px rgba(140,150,220,.12);
-    }
-
-    button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):active {
-      transform: scale(.965);
-      box-shadow:
-        0 2px 8px rgba(99,120,200,.14),
-        inset 0 2px 5px rgba(120,130,200,.12);
-    }
-
-    /* Acciones principales: cápsula luminosa azul-púrpura suave. */
-    button.liquid-btn-primary,
-    .liquid-btn-primary {
-      background: linear-gradient(112deg,
-        rgba(186,200,255,.96) 0%,
-        rgba(139,150,245,.94) 48%,
-        rgba(155,140,250,.96) 100%);
-      color: #fff;
-      border: 1.5px solid rgba(255,255,255,.85);
-      -webkit-backdrop-filter: blur(18px) saturate(190%);
-      backdrop-filter: blur(18px) saturate(190%);
-      box-shadow:
-        0 7px 20px rgba(100,120,220,.26),
-        0 0 16px rgba(130,140,235,.18),
-        inset 0 2px 3px rgba(255,255,255,.80),
-        inset 0 -3px 6px rgba(80,90,190,.16);
-      text-shadow: 0 1px 3px rgba(50,60,140,.24);
-    }
-
-    button.liquid-btn-primary::before,
-    .liquid-btn-primary::before {
-      border-color: rgba(255,255,255,.45);
-    }
-
-    button.liquid-btn-primary:hover,
-    .liquid-btn-primary:hover {
-      filter: brightness(1.05) saturate(1.06);
-      box-shadow:
-        0 9px 25px rgba(100,120,220,.34),
-        0 0 20px rgba(130,140,235,.24),
-        inset 0 2px 4px rgba(255,255,255,.90),
-        inset 0 -3px 6px rgba(80,90,190,.18);
-    }
-
-    /* Acciones destructivas: cristal rosa suave, sin cambiar su función. */
-    button[onclick*="delete"],
-    button[onclick*="confirmRefresh"] {
-      background: linear-gradient(120deg,
-        rgba(255,200,220,.90), rgba(244,140,190,.86)) !important;
-      color: #8F285F !important;
-      border: 1px solid rgba(255,255,255,.82) !important;
-      box-shadow: 0 6px 17px rgba(222,74,151,.17),
-        inset 0 1.5px 2px rgba(255,255,255,.88) !important;
-      text-shadow: none;
-    }
-
-    /* Navegación de semana y botones de icono: cristal azul-púrpura suave. */
-    #btnPrevWeek, #btnNextWeek,
-    button[onclick="closeAll()"]:not(.w-full) {
-      background: linear-gradient(135deg,
-        rgba(255,255,255,.80), rgba(230,238,255,.70), rgba(236,230,255,.74));
-      color: #5B63C7;
-    }
-
-    button:disabled,
-    button[disabled] {
-      opacity: .42;
-      filter: saturate(.55);
-      cursor: not-allowed !important;
-      transform: none !important;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,.55) !important;
-    }
-
-    /* Los chips conservan sus colores de estado (a tiempo / retardo / pendiente). */
-    button.record-chip-clickable {
-      border: 1px solid rgba(255,255,255,.58);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,.38),
-        0 2px 6px rgba(90,110,180,.08);
-      transition: transform .16s ease, filter .16s ease;
-    }
-    button.record-chip-clickable:active { transform: scale(.96); }
-
-    /* Modo oscuro: cristal legible con reflejos azul-púrpura suaves. */
-    .dark button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary):not(.liquid-btn-primary) {
-      background: linear-gradient(135deg,
-        rgba(70,80,140,.62) 0%,
-        rgba(80,70,145,.58) 52%,
-        rgba(90,75,150,.55) 100%);
-      color: #E8ECFF;
-      border-color: rgba(190,200,255,.28);
-      box-shadow:
-        0 6px 18px rgba(8,10,30,.28),
-        0 0 14px rgba(110,120,220,.12),
-        inset 0 1.5px 2px rgba(255,255,255,.18),
-        inset 0 -2px 4px rgba(10,12,30,.14);
-      text-shadow: 0 1px 2px rgba(0,0,0,.16);
-    }
-
-    .dark button.liquid-btn-primary,
-    .dark .liquid-btn-primary {
-      background: linear-gradient(112deg,
-        rgba(140,155,240,.94) 0%,
-        rgba(115,125,220,.94) 48%,
-        rgba(130,120,235,.94) 100%);
-      color: #fff;
-      border-color: rgba(200,210,255,.48);
-      box-shadow: 0 8px 22px rgba(70,80,180,.36),
-        0 0 16px rgba(120,130,230,.18),
-        inset 0 1.5px 2px rgba(255,255,255,.34);
-    }
-
-    .dark button[onclick*="delete"],
-    .dark button[onclick*="confirmRefresh"] {
-      background: linear-gradient(120deg, rgba(180,70,130,.70), rgba(145,50,110,.74)) !important;
-      color: #FFEAF4 !important;
-      border-color: rgba(255,190,220,.32) !important;
-    }
-
-    .dark button.record-chip-clickable {
-      border-color: rgba(255,255,255,.16);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      button:not(.glass-toggle):not(.record-chip-clickable):not(.liquid-btn-primary) {
-        transition: none;
-      }
-    }
-
+    @keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   </style>
 </head>
-<body class="h-full text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-300">
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-200">
 
-  <!-- Capa de Orbes Pastel Ambientales (Profundidad Liquid Glass) -->
-  <div class="ambient-orb w-80 h-80 bg-blue-300/60 dark:bg-indigo-600/30 -top-20 -left-16"></div>
-  <div class="ambient-orb w-96 h-96 bg-purple-300/65 dark:bg-purple-700/25 top-1/4 -right-24"></div>
-  <div class="ambient-orb w-80 h-80 bg-sky-200/70 dark:bg-blue-700/25 bottom-10 left-4"></div>
-  <div class="ambient-orb w-72 h-72 bg-violet-200/65 dark:bg-violet-700/25 -bottom-16 right-8"></div>
-
-  <!-- OVERLAY DIFUMINADO -->
-  <div id="overlay" onclick="closeAll()" class="fixed inset-0 z-[60] blur-overlay transition-opacity duration-200 hidden"></div>
-
-  <!-- MENÚ DE AJUSTES (Siempre por encima del difuminado) -->
-  <div id="settingsMenu" onclick="event.stopPropagation()" class="hidden fixed right-4 top-[78px] glass-dropdown min-w-[235px] rounded-2xl z-[70] p-1.5 flex flex-col fade-in">
-    <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-      Opciones de sesión
-    </div>
-    <button type="button" onclick="openSwitchUserModal()" class="w-full px-3 py-2.5 text-left text-[13px] font-semibold text-slate-700 dark:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-white/10 rounded-xl flex items-center gap-3 transition-colors cursor-pointer">
-      <span class="w-7 h-7 rounded-lg bg-slate-200/80 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
-        <i data-lucide="user-plus" class="w-4 h-4"></i>
-      </span>
-      <span>Cambiar de Miniser</span>
-    </button>
-    <div class="border-t border-slate-200/80 dark:border-white/10 my-1 mx-2"></div>
-    <button type="button" onclick="clearLocalStorage()" class="w-full px-3 py-2.5 text-left text-[13px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl flex items-center gap-3 transition-colors cursor-pointer">
-      <span class="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 dark:text-rose-400 shrink-0">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-      </span>
-      <span>Refrescar datos locales</span>
-    </button>
-  </div>
+  <div id="overlay" onclick="closeAll()" class="fixed inset-0 z-40 blur-overlay transition-opacity duration-200 hidden"></div>
 
   <!-- POPUP FLOTANTE: Hora Exacta -->
   <div id="recordExactPopup" class="fixed z-[80] hidden pointer-events-none transition-opacity duration-150">
-    <div class="liquid-glass px-3.5 py-2 rounded-2xl flex flex-col items-center text-center">
-      <span id="popupRecordLabel" class="text-[9px] font-bold text-purple-600 dark:text-purple-300 uppercase tracking-wider leading-none mb-1">--</span>
-      <span id="popupRecordTime" class="text-xs font-extrabold tracking-wide leading-none text-slate-800 dark:text-white">--:--:--</span>
+    <div class="bg-slate-900 dark:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xl border border-white/15 flex flex-col items-center text-center">
+      <span id="popupRecordLabel" class="text-[9px] font-semibold text-teal-400 uppercase tracking-wider leading-none mb-1">--</span>
+      <span id="popupRecordTime" class="text-xs font-extrabold tracking-wide leading-none">--:--:--</span>
     </div>
-    <div class="w-2.5 h-2.5 bg-white/80 dark:bg-slate-800/80 border-r border-b border-white/60 dark:border-white/15 transform rotate-45 mx-auto -mt-1.5 backdrop-blur-md"></div>
+    <div class="w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-r border-b border-white/15 transform rotate-45 mx-auto -mt-1.5"></div>
   </div>
 
   <!-- LOADER -->
-  <div id="ocrLoader" class="fixed inset-0 z-[100] bg-slate-900/30 dark:bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="liquid-glass w-full max-w-xs rounded-[28px] p-6 flex flex-col items-center text-center fade-in">
+  <div id="ocrLoader" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-white/90 dark:bg-slate-900/90 w-full max-w-xs rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center fade-in border border-white/20 dark:border-slate-700/30">
       <div class="loader mb-4"></div>
       <h3 class="font-bold text-base text-app-title dark:text-darkapp-title mb-1">Procesando checada</h3>
       <p class="text-xs text-app-sub dark:text-darkapp-sub font-medium" id="loaderText">Preparando cámara...</p>
@@ -487,12 +73,9 @@
   </div>
 
   <!-- MODAL: Selección inicial de usuario -->
-  <div id="modalInitialUser" class="fixed inset-0 z-[80] flex items-center justify-center p-4 liquid-modal-backdrop hidden">
-    <div class="liquid-modal-sheet w-full max-w-sm rounded-[30px] p-6 slide-up flex flex-col max-h-[85vh]">
+  <div id="modalInitialUser" class="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30 flex flex-col max-h-[85vh]">
       <div class="text-center mb-5">
-        <div class="w-12 h-12 rounded-2xl liquid-pill mx-auto mb-3 flex items-center justify-center text-purple-600 dark:text-purple-300">
-          <i data-lucide="clock-check" class="w-6 h-6"></i>
-        </div>
         <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Bienvenido al Checador</h3>
         <p class="text-xs text-app-sub dark:text-darkapp-sub mt-1">Selecciona tu usuario para comenzar a registrar turnos</p>
       </div>
@@ -500,242 +83,220 @@
     </div>
   </div>
 
-  <div class="main-content relative z-10 h-full flex flex-col overflow-y-auto pb-12">
+  <div class="main-content h-full flex flex-col overflow-y-auto pb-10">
     
-    <!-- HEADER GLASS FLOTANTE -->
-    <header class="mx-4 mt-3 mb-2 px-4 py-3 rounded-[24px] liquid-glass flex items-center justify-between sticky top-3 z-30 transition-all">
+    <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-2xl liquid-btn-primary flex items-center justify-center shrink-0">
-          <i data-lucide="clock-2" class="w-5 h-5 text-white"></i>  
-        </div>
+                  <i data-lucide="fingerprint-pattern" class="w-7 h-7"></i>  
         <div>
-          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title tracking-tight">Checador</h1>
-          <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-semibold mt-0.5">
-            <span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,139,250,0.85)] inline-block"></span> 
+          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador</h1>
+          <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> 
             <span>Gran Plaza Mérida</span>
           </p>
         </div>
       </div>
       
-      <div class="flex items-center space-x-2.5">
-        <!-- TOGGLE CLARO / OSCURO: GLASSMORPHISM AZUL SERENO -->
-        <button id="btn-theme-toggle" class="glass-toggle h-9 w-[62px] rounded-full relative flex items-center p-1 cursor-pointer transition-all duration-300" title="Cambiar modo claro/oscuro" aria-label="Cambiar modo claro/oscuro">
-            <div class="glass-toggle-thumb w-7 h-7 rounded-full flex items-center justify-center transform transition-transform duration-300 ease-out translate-x-0 dark:translate-x-[26px]">
-                <i data-lucide="sun" class="w-3.5 h-3.5 text-white dark:hidden"></i>
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-white hidden dark:block"></i>
+      <div class="flex items-center space-x-2">
+        <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+            <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+            </div>
+            <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
             </div>
         </button>
-
-        <button type="button" onclick="toggleSettings(event)" class="w-9 h-9 rounded-full liquid-pill flex items-center justify-center text-app-sub dark:text-darkapp-sub hover:text-purple-600 dark:hover:text-purple-300 transition-colors cursor-pointer relative z-50">
-          <i data-lucide="settings" class="w-4 h-4"></i>
+        <button type="button" onclick="toggleSettings(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors cursor-pointer relative z-50" title="Ajustes">
+          <i data-lucide="settings" class="w-5 h-5"></i>
         </button>
       </div>
     </header>
 
     <!-- BARRA DE ESTADO DE SINCRONIZACIÓN -->
-    <div id="syncBar" class="hidden mx-4 mb-2 rounded-2xl liquid-card text-[11px] font-semibold overflow-hidden">
-        <div class="flex items-center justify-between p-2.5 px-3.5 gap-2">
+    <div id="syncBar" class="hidden mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden">
+        <div class="flex items-center justify-between p-2.5 gap-2">
             <span id="syncIndicator" class="inline-flex items-center gap-1.5"></span>
-            <button id="btnSyncNow" onclick="processPendingQueue()" class="liquid-btn-primary px-3 py-1.5 rounded-full text-[10px] font-bold cursor-pointer hidden">
+            <button type="button" id="btnSyncNow" onclick="processPendingQueue()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer hidden">
                 Sincronizar ahora
             </button>
         </div>
     </div>
 
+    <!-- MENÚ DE AJUSTES -->
+    <div id="settingsMenu" class="hidden fixed right-4 top-[72px] mt-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl min-w-[220px] shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[45] py-2 flex flex-col fade-in">
+      <button type="button" onclick="openSwitchUserModal()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 flex items-center gap-3 transition-colors">
+        <i data-lucide="user-plus" class="w-4 h-4 text-blue-500"></i> Registrar a otro usuario
+      </button>
+      <button type="button" onclick="logoutSession()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 flex items-center gap-3 transition-colors">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Cambiar usuario
+      </button>
+      <div class="border-t border-app-border/50 dark:border-darkapp-border/50 my-1 mx-2"></div>
+      <button type="button" onclick="clearLocalStorage()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 flex items-center gap-3 transition-colors">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refrescar sesión local
+      </button>
+    </div>
+
     <!-- Banner "Registrando a otro usuario" -->
-    <div id="otherUserBanner" class="hidden liquid-card border-purple-400/40 mx-4 mb-2 p-3 rounded-2xl flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 text-purple-700 dark:text-purple-300 text-xs font-semibold">
-        <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
-        <span>Registrando a: <strong id="otherUserName" class="font-bold"></strong></span>
+    <div id="otherUserBanner" class="hidden bg-blue-500/10 border border-blue-500/20 mx-5 mb-2 p-3 rounded-xl flex items-center justify-between">
+      <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-sm font-semibold">
+        <i data-lucide="info" class="w-4 h-4"></i>
+        Registrando turno para: <span id="otherUserName" class="font-bold"></span>
       </div>
-      <button onclick="returnToSessionUser()" class="liquid-btn-primary font-bold text-[11px] px-3.5 py-1.5 rounded-full shrink-0">
+      <button type="button" onclick="returnToSessionUser()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
         Volver a mi perfil
       </button>
     </div>
 
-    <main class="px-4 pt-1 flex-1 flex flex-col gap-4">
+    <main class="px-5 flex-1 flex flex-col gap-5">
       
-      <!-- TARJETA HERO: PERFIL + RELOJ + TURNO -->
-      <section class="liquid-glass rounded-[28px] p-5 flex flex-col gap-4">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-3 min-w-0">
-            <div id="activeEmployeeAvatar"></div>
-            <div class="min-w-0">
-              <h2 id="activeEmployeeName" class="font-bold text-base text-app-title dark:text-darkapp-title leading-tight truncate">Cargando...</h2>
-              <div id="statusBadge" class="inline-flex items-center gap-1.5 text-slate-500 font-semibold text-xs mt-1">
-                <i data-lucide="ban" class="w-3.5 h-3.5"></i> <span id="statusText">FUERA DE TURNO</span>
-              </div>
+      <div class="pt-1 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="activeEmployeeAvatar"></div>
+          <div>
+            <h2 id="activeEmployeeName" class="font-bold text-base text-app-title dark:text-darkapp-title leading-tight">Cargando...</h2>
+            <div id="statusBadge" class="flex items-center gap-1.5 text-slate-500 font-semibold text-xs mt-1">
+              <i data-lucide="ban" class="w-3.5 h-3.5"></i> <span id="statusText">FUERA DE TURNO</span>
             </div>
           </div>
-          <div class="text-right shrink-0">
-            <h2 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-800 to-purple-700 dark:from-white dark:to-purple-300 bg-clip-text text-transparent" id="currentTime">--:-- --</h2>
-            <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-semibold" id="currentDate">--</p>
-          </div>
         </div>
-
-        <div class="liquid-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between">
-          <span class="text-xs font-bold text-purple-700 dark:text-purple-300" id="assignedShiftText">Turno asignado: --</span>
-          <div class="w-6 h-6 rounded-full bg-purple-500/15 flex items-center justify-center">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-purple-600 dark:text-purple-300"></i>
-          </div>
+        <div class="text-right">
+          <h2 class="text-2xl font-extrabold tracking-tight" id="currentTime">--:-- --</h2>
+          <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium" id="currentDate">--</p>
         </div>
+      </div>
 
-        <!-- MÉTRICAS EN MINI-TARJETAS DE CRISTAL -->
-        <div class="grid grid-cols-2 gap-2.5">
-          <div class="liquid-card rounded-2xl p-3">
-            <label class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-0.5">Checadas</label>
-            <p class="text-xl font-black text-slate-800 dark:text-white" id="statChecks">0/4</p>
-          </div>
-          <div class="liquid-card rounded-2xl p-3">
-            <label class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-0.5">Entrada</label>
-            <p class="text-xl font-black text-slate-800 dark:text-white" id="statEntry">--:-- --</p>
-          </div>
-          <div class="liquid-card rounded-2xl p-3">
-            <label class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-0.5">Comida</label>
-            <p class="text-xl font-black text-slate-800 dark:text-white" id="statLunch">—</p>
-          </div>
-          <div class="liquid-card rounded-2xl p-3">
-            <label class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-0.5">Jornada</label>
-            <p class="text-xl font-black text-slate-800 dark:text-white" id="statShift">0 min</p>
-          </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl flex items-center justify-between">
+        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400" id="assignedShiftText">Turno asignado: --</span>
+        <i data-lucide="clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+      </div>
+
+      <div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50"></div>
+
+      <div class="grid grid-cols-2 gap-y-4 pt-1">
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Checadas</label>
+          <p class="text-2xl font-black" id="statChecks">0/4</p>
         </div>
-      </section>
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Entrada</label>
+          <p class="text-2xl font-black" id="statEntry">--:-- --</p>
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Comida</label>
+          <p class="text-2xl font-black" id="statLunch">—</p>
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Jornada</label>
+          <p class="text-2xl font-black" id="statShift">0 min</p>
+        </div>
+      </div>
 
-      <!-- SECCIÓN: REGISTROS DE HOY -->
-      <section class="liquid-glass rounded-[28px] p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-xl bg-purple-500/15 flex items-center justify-center text-purple-600 dark:text-purple-300">
-              <i data-lucide="calendar-check" class="w-4 h-4"></i>
-            </div>
-            <h3 class="font-bold text-[13px] uppercase tracking-wider text-slate-700 dark:text-slate-200">Registros de hoy</h3>
-          </div>
+      <div class="mt-2">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="calendar-check" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+          <h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de hoy</h3>
         </div>
         
-        <div class="w-full h-2 bg-white/50 dark:bg-slate-800/60 rounded-full mb-4 overflow-hidden p-0.5 border border-white/60 dark:border-white/10">
-          <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-purple-400 via-violet-500 to-sky-400 w-0 transition-all duration-500 ease-out"></div>
+        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
+          <div id="progressBar" class="h-full bg-app-brand dark:bg-teal-500 w-0 transition-all duration-500 ease-out"></div>
         </div>
 
-        <div class="flex flex-col gap-2.5" id="checksList"></div>
+        <div class="flex flex-col gap-1" id="checksList"></div>
         
-        <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-4 text-center font-medium">Las fotos se almacenan de forma segura en la Nube.</p>
-      </section>
+        <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-5 text-center">Las fotos se almacenan de forma segura en la Nube.</p>
 
-      <!-- SECCIÓN: REGISTROS DE LA SEMANA -->
-      <section class="liquid-glass rounded-[28px] p-5 flex flex-col gap-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-xl bg-purple-500/15 flex items-center justify-center text-purple-600 dark:text-purple-300">
-              <i data-lucide="calendar-days" class="w-4 h-4"></i>
+        <div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50 my-6"></div>
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="calendar-days" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+              <h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de la Semana</h3>
             </div>
-            <h3 class="font-bold text-[13px] uppercase tracking-wider text-slate-700 dark:text-slate-200">Registros de la Semana</h3>
+            <button type="button" onclick="downloadEmployeeScheduleImage()" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-xl transition-colors cursor-pointer" title="Descargar horarios de la semana">
+              <i data-lucide="calendar-arrow-down" class="w-5 h-5"></i>  
+            </button>
           </div>
-          <button type="button" onclick="downloadEmployeeScheduleImage()" class="liquid-btn-primary w-9 h-9 rounded-full flex items-center justify-center cursor-pointer" title="Descargar horarios de la semana">
-            <i data-lucide="calendar-arrow-down" class="w-4 h-4 text-white"></i>
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between liquid-card rounded-2xl p-2">
-          <button id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-purple-600 dark:hover:text-purple-300 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-          </button>
-          <div class="flex flex-col items-center">
-            <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Semana Actual</span>
-            <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
+ 
+          <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
+            <button type="button" id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <div class="flex flex-col items-center">
+              <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Semana Actual</span>
+              <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
+            </div>
+            <button type="button" id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed" disabled>
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
           </div>
-          <button id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-xl cursor-not-allowed" disabled>
-            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-          </button>
-        </div>
 
-        <div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub liquid-card py-2 rounded-2xl">
-          <div class="flex items-center gap-1.5"><i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i> A tiempo</div>
-          <div class="flex items-center gap-1.5"><i data-lucide="clock-fading" class="w-4 h-4 text-amber-500"></i> Retardo</div>
-          <div class="flex items-center gap-1.5"><i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i> Sin Registro</div>
-        </div>
+          <div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card py-2 rounded-xl shadow-sm">
+            <div class="flex items-center gap-1.5"><i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i> A tiempo</div>
+            <div class="flex items-center gap-1.5"><i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i> Retardo</div>
+            <div class="flex items-center gap-1.5"><i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i> Sin Registro</div>
+          </div>
 
-        <div id="weeklyScheduleContainer" class="liquid-card rounded-2xl px-3.5 py-1.5"></div>
-      </section>
+          <div id="weeklyScheduleContainer" class="bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm px-4 py-2"></div>
+        </div>
+      </div>
 
     </main>
   </div>
 
   <!-- Contenedor Oculto para Generar y Descargar la Imagen de Horarios del Empleado -->
-  <div id="exportScheduleContainer" class="fixed -top-[9999px] left-0 w-[400px] text-slate-800 p-8 rounded-3xl font-sans z-[-999]" style="box-sizing: border-box; background: linear-gradient(135deg, #E2ECFC 0%, #EDE7FC 50%, #E0F2FE 100%);">
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/70">
+  <div id="exportScheduleContainer" class="fixed -top-[9999px] left-0 w-[400px] bg-white text-slate-900 p-8 rounded-3xl shadow-2xl font-sans z-[-999]" style="box-sizing: border-box;">
+    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
       <div>
         <h2 id="exportModalTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">Horarios</h2>
-        <p id="exportModalRange" class="text-sm font-bold text-purple-600 mt-1">--/-- al --/--</p>
+        <p id="exportModalRange" class="text-sm font-semibold text-teal-700 mt-1">--/-- al --/--</p>
       </div>
       <div class="text-right">
-        <p id="exportModalEmployeeName" class="text-sm font-bold text-slate-800">Nombre del Miniser</p>
+        <p id="exportModalEmployeeName" class="text-s font-bold text-slate-800">Nombre del Miniser</p>
         <p class="text-xs text-slate-500 font-medium">Gran Plaza Mérida</p>
       </div>
     </div>
-    <div id="exportModalScheduleList" class="flex flex-col gap-2.5">
+    <div id="exportModalScheduleList" class="flex flex-col gap-3">
       <!-- Inyectado dinámicamente -->
     </div>
   </div>
 
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="opacity-0 pointer-events-none fixed -top-96 w-px h-px">
 
-  <!-- MODAL: Confirmar Refrescar Datos Locales -->
-  <div id="modalRefreshConfirm" onclick="closeAll()" class="fixed inset-0 z-[80] flex items-center justify-center p-4 liquid-modal-backdrop hidden">
-    <div onclick="event.stopPropagation()" class="liquid-modal-sheet w-full max-w-sm rounded-[30px] p-6 slide-up text-center">
-      <div class="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-400/30 mx-auto mb-3.5 flex items-center justify-center text-rose-600 dark:text-rose-400">
-        <i data-lucide="refresh-cw" class="w-6 h-6"></i>
-      </div>
-      <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Refrescar datos locales</h3>
-      <p class="text-xs text-app-sub dark:text-darkapp-sub mt-1.5 mb-5 leading-relaxed">
-        ¿Refrescar la sesión y datos locales de este dispositivo?
-      </p>
-      <div class="grid grid-cols-2 gap-2.5">
-        <button type="button" onclick="closeAll()" class="w-full py-3 rounded-full text-xs font-bold text-slate-700 dark:text-slate-200 liquid-pill hover:bg-white/90 dark:hover:bg-white/15 transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="button" onclick="confirmRefreshLocalStorage()" class="w-full py-3 rounded-full text-xs font-bold text-white bg-rose-500/85 hover:bg-rose-500 border border-rose-300/60 shadow-md transition-colors cursor-pointer">
-          Aceptar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Seleccionar o Cambiar Usuario -->
-  <div id="modalSwitchUser" onclick="closeAll()" class="fixed inset-0 z-[80] flex items-center justify-center p-4 liquid-modal-backdrop hidden">
-    <div onclick="event.stopPropagation()" class="liquid-modal-sheet w-full max-w-sm rounded-[30px] p-6 slide-up">
-      <div class="flex justify-between items-center mb-3">
+  <!-- MODAL: Registrar a otro usuario -->
+  <div id="modalSwitchUser" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30">
+      <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Seleccionar Miniser</h3>
-        <button type="button" onclick="closeAll()" class="w-8 h-8 rounded-full liquid-pill flex items-center justify-center text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button type="button" onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4">Selecciona al Miniser para registrar su checada.</p>
-      <div id="switchUserList" class="max-h-64 overflow-y-auto flex flex-col gap-2.5 pr-1"></div>
+      <div id="switchUserList" class="max-h-60 overflow-y-auto flex flex-col gap-2"></div>
     </div>
   </div>
 
   <!-- MODAL: Resultado OCR / Registro -->
-  <div id="modalOCRResult" class="fixed inset-0 z-[80] flex flex-col items-center justify-center p-4 hidden bg-slate-900/35 dark:bg-slate-950/65 backdrop-blur-md">
-    <div class="liquid-glass w-full max-w-sm rounded-[30px] p-5 slide-up relative">
-      <button onclick="closeAll()" class="absolute top-4 right-4 w-8 h-8 rounded-full liquid-pill flex items-center justify-center text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+  <div id="modalOCRResult" class="fixed inset-0 z-[70] flex flex-col items-center justify-center p-4 hidden bg-slate-950/80 backdrop-blur-md">
+    <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-sm rounded-3xl p-5 shadow-2xl slide-up relative border border-white/20 dark:border-slate-700/30">
+      <button type="button" onclick="closeAll()" class="absolute top-4 right-4 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-6 h-6"></i></button>
       
       <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title mb-1 text-center">Registro Exitoso</h3>
       <p id="resStatus" class="text-[12px] text-app-sub dark:text-darkapp-sub text-center mb-4">Datos procesados</p>
       
-      <img id="ocrPreviewImage" src="" class="w-full h-48 object-contain bg-white/40 dark:bg-slate-900/40 rounded-2xl mb-4 border border-white/60 dark:border-white/15">
+      <img id="ocrPreviewImage" src="" alt="Vista previa de checada" class="w-full h-48 object-contain bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-transparent">
       
-      <div class="liquid-card rounded-2xl p-4 mb-4 space-y-3">
+      <div class="bg-slate-50/50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3">
         <div class="flex items-start gap-3">
-          <div class="w-7 h-7 rounded-xl bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5">
-            <i data-lucide="user" class="w-4 h-4 text-purple-600 dark:text-purple-300"></i>
-          </div>
+          <i data-lucide="user" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
           <div>
             <p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Nombre</p>
             <p id="resName" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
           </div>
         </div>
         <div class="flex items-start gap-3">
-          <div class="w-7 h-7 rounded-xl bg-violet-500/15 flex items-center justify-center shrink-0 mt-0.5">
-            <i data-lucide="calendar" class="w-4 h-4 text-violet-600 dark:text-violet-300"></i>
-          </div>
+          <i data-lucide="calendar" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
           <div>
             <p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Fecha y Hora de Registro</p>
             <p id="resDate" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
@@ -743,33 +304,73 @@
         </div>
       </div>
       
-      <button onclick="closeAll()" class="w-full liquid-btn-primary font-bold py-3.5 rounded-full text-sm">
+      <button type="button" onclick="closeAll()" class="w-full bg-transparent text-app-brand dark:text-teal-400 font-bold py-3.5 rounded-xl text-sm hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors">
         Entendido
       </button>
     </div>
   </div>
 
   <!-- MODAL: Visor de Foto -->
-  <div id="modalPhoto" class="fixed inset-0 z-[80] flex flex-col items-center justify-center p-4 hidden bg-slate-950/75 backdrop-blur-lg">
+  <div id="modalPhoto" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 hidden bg-slate-950/90 backdrop-blur-md">
     <div class="relative w-full max-w-md max-h-[90vh] flex flex-col">
       <div class="sticky top-0 z-20 flex justify-end pb-2">
-        <button onclick="closeAll()" class="liquid-glass text-slate-800 dark:text-white p-2.5 rounded-full shadow-lg transition-transform active:scale-95">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button type="button" onclick="closeAll()" class="bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full backdrop-blur-md shadow-lg transition-colors border border-white/20">
+          <i data-lucide="x" class="w-6 h-6"></i>
         </button>
       </div>
       <div class="overflow-y-auto flex-1 flex flex-col items-center pr-1">
-        <img id="photoViewer" src="" class="w-full rounded-3xl shadow-2xl mb-4 object-contain border border-white/30">
-        <div id="ocrResultData" class="text-white text-center liquid-glass p-4 rounded-2xl hidden w-full mb-4">
-          <p class="text-sm font-bold text-purple-300 mb-2">Datos Detectados en la Foto</p>
+        <img id="photoViewer" src="" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="w-full rounded-2xl shadow-2xl mb-4 object-contain bg-slate-900">
+        <div id="ocrResultData" class="text-white text-center bg-slate-800/80 p-4 rounded-xl hidden w-full mb-4 backdrop-blur-md">
+          <p class="text-sm font-bold text-emerald-400 mb-2">Datos Detectados en la Foto</p>
           <p id="ocrNameText" class="text-sm">Nombre: --</p>
           <p id="ocrDateText" class="text-sm">Fecha: --</p>
         </div>
-        <div id="pendingNotice" class="hidden text-white text-center bg-amber-500/20 p-3 rounded-2xl w-full mb-4 backdrop-blur-md border border-amber-400/40">
+        <div id="pendingNotice" class="hidden text-white text-center bg-amber-500/20 p-3 rounded-xl w-full mb-4 backdrop-blur-md border border-amber-500/40">
           <p class="text-xs font-semibold text-amber-200">Registro pendiente de subir</p>
-          <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar conexión</p>
+          <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar la conexión</p>
         </div>
-        <button id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-300/45 text-rose-200 font-bold py-3 rounded-full text-sm transition-colors mb-4 backdrop-blur-md shadow-inner">
+        <button type="button" id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
           Borrar Registro
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirmación Unificada (Glassmorphism) -->
+  <div id="customConfirmModal" class="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+    <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
+      <div id="customConfirmIconContainer" class="text-rose-500 flex justify-center mx-auto">
+        <i data-lucide="alert-triangle" id="customConfirmIcon" class="w-8 h-8"></i>
+      </div>
+      <div class="space-y-1.5">
+        <h3 id="customConfirmTitle" class="text-base font-bold text-app-title dark:text-darkapp-title">Confirmar acción</h3>
+        <p id="customConfirmText" class="text-xs font-medium text-app-sub dark:text-darkapp-sub leading-relaxed whitespace-pre-line">
+          ¿Deseas continuar?
+        </p>
+      </div>
+      <div class="flex justify-center items-center gap-2 w-full pt-1">
+        <button type="button" id="customConfirmCancelBtn" onclick="closeCustomConfirm(false)" class="py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
+          Cancelar
+        </button>
+        <button type="button" id="customConfirmAcceptBtn" onclick="closeCustomConfirm(true)" class="py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Alerta / Aviso (Glassmorphism) -->
+  <div id="customAlertModal" class="fixed inset-0 z-[10010] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+    <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
+      <div id="customAlertIconContainer" class="text-rose-500 flex justify-center mx-auto">
+        <i data-lucide="alert-circle" id="customAlertIcon" class="w-8 h-8"></i>
+      </div>
+      <p id="customAlertText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed whitespace-pre-line">
+        Mensaje
+      </p>
+      <div class="flex justify-center pt-1">
+        <button type="button" onclick="closeCustomAlert()" class="w-full py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer">
+          Aceptar
         </button>
       </div>
     </div>
@@ -777,7 +378,7 @@
 
   <script>
     // ============================================================================
-    // SEGURIDAD
+    // SEGURIDAD Y SERVICE WORKER
     // ============================================================================
     function escapeHtml(str) {
         if (str == null) return '';
@@ -786,31 +387,38 @@
         }[c]));
     }
 
-    function renderAvatarFallback(el, initial, sizeClass) {
-        if (!el || !el.parentElement) return;
-        const fallback = document.createElement('div');
-        fallback.className = `${sizeClass} rounded-full liquid-btn-primary text-white flex items-center justify-center font-bold uppercase shrink-0`;
-        fallback.textContent = initial || '?';
-        el.parentElement.replaceChild(fallback, el);
+    function initServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => console.log('[PWA] SW OK en Checador:', registration.scope))
+                .catch((error) => console.error('[PWA] SW error:', error));
+        }
     }
 
     // ============================================================================
-    // SUPABASE
+    // SUPABASE (ACCESO DIRECTO SIN LOGIN / SIN SESIÓN AUTH)
     // ============================================================================
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
     const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false
+            }
+          })
         : null;
 
     // ============================================================================
-    // INDEXEDDB — COLA OFFLINE + CACHÉ DE DATOS
+    // INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA (CON RESPALDO LOCALSTORAGE)
     // ============================================================================
     const DB_NAME = 'ChecadorOfflineDB';
     const DB_VERSION = 2;
     const STORE_PENDING = 'registros_pendientes';
-    const STORE_CACHE = 'cache_datos';
+    const STORE_CACHE = 'cache_lectura';
+    const CACHE_PREFIX = 'checador_cache_v1_';
 
     function openOfflineDB() {
         return new Promise((resolve, reject) => {
@@ -859,27 +467,42 @@
         });
     }
 
-    async function setCachedData(key, value) {
+    async function setReadCache(key, value) {
         try {
             await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
-        } catch (err) {
-            console.warn('[Cache] No se pudo guardar en IndexedDB:', key, err);
+        } catch (e) {
+            console.warn('[Cache Checador] Error guardando en IndexedDB:', key, e);
+        }
+
+        try {
+            localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+        } catch (e) {
+            console.warn('[Cache Checador] Error guardando en localStorage:', key, e);
         }
     }
 
-    async function getCachedData(key) {
+    async function getReadCache(key) {
         try {
             const db = await openOfflineDB();
-            return await new Promise((resolve, reject) => {
+            const idbVal = await new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_CACHE, 'readonly');
                 const req = tx.objectStore(STORE_CACHE).get(key);
                 req.onsuccess = () => resolve(req.result ? req.result.value : null);
                 req.onerror = () => reject(req.error);
             });
-        } catch (err) {
-            console.warn('[Cache] No se pudo leer de IndexedDB:', key, err);
-            return null;
+            if (idbVal != null) return idbVal;
+        } catch (e) {
+            console.warn('[Cache Checador] Error leyendo IndexedDB:', key, e);
         }
+
+        try {
+            const raw = localStorage.getItem(CACHE_PREFIX + key);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.warn('[Cache Checador] Error leyendo localStorage:', key, e);
+        }
+
+        return null;
     }
 
     // ============================================================================
@@ -893,15 +516,15 @@
         if (isDark) {
             htmlElement.classList.add('dark');
             localStorage.setItem('theme', 'dark');
-            if (themeMeta) themeMeta.setAttribute('content', '#13182B');
+            if (themeMeta) themeMeta.setAttribute('content', '#0F172A');
         } else {
             htmlElement.classList.remove('dark');
             localStorage.setItem('theme', 'light');
-            if (themeMeta) themeMeta.setAttribute('content', '#E8EFFD');
+            if (themeMeta) themeMeta.setAttribute('content', '#F8F9FA');
         }
     }
 
-    setTheme(localStorage.getItem('theme') === 'dark');
+    setTheme(localStorage.getItem('theme') !== 'light');
     btnThemeToggle.addEventListener('click', () => {
         setTheme(!htmlElement.classList.contains('dark'));
     });
@@ -922,6 +545,7 @@
     let activePopupTrigger = null;
     let isSyncing = false;
     let pendingBlobUrls = {};
+    let ocrPreviewBlobUrl = null;
     let realtimeInitialized = false;
 
     const CHECK_TYPES = [
@@ -934,7 +558,7 @@
     const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
 
     // ============================================================================
-    // HELPERS DE BLOB URLs
+    // HELPERS DE BLOB URLs Y AVATAR
     // ============================================================================
     function getBlobUrlForPending(p) {
         if (pendingBlobUrls[p.localId]) return pendingBlobUrls[p.localId];
@@ -953,21 +577,22 @@
         }
     }
 
+    function buildAvatarHTML(user, sizeClass = 'w-11 h-11', textClass = 'text-sm') {
+        const initial = escapeHtml((user?.name || '?').charAt(0));
+        const fallback = `<div class="${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm">${initial}</div>`;
+        if (!user || !user.photoUrl) return fallback;
+        return `<img src="${escapeHtml(user.photoUrl)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm', textContent:'${initial}'}));" class="${sizeClass} rounded-full object-cover shrink-0 shadow-sm">`;
+    }
+
     // ============================================================================
     // INICIALIZACIÓN
     // ============================================================================
     document.addEventListener('DOMContentLoaded', async () => {
-      lucide.createIcons();
+      initServiceWorker();
+      if (window.lucide) lucide.createIcons();
       updateClock();
       setInterval(updateClock, 1000);
       setInterval(updateShiftTime, 60000);
-
-      // Registrar Service Worker para PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('[PWA] Service Worker registrado correctamente.'))
-          .catch((err) => console.warn('[PWA] Error al registrar Service Worker:', err));
-      }
 
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.record-chip-clickable')) {
@@ -983,32 +608,27 @@
       window.addEventListener('offline', handleOfflineEvent);
 
       try {
-        // 1. En DOMContentLoaded, después de cargar pendingRecords:
-pendingRecords = await dbGetAll(STORE_PENDING);
-cleanupOrphanBlobUrls();
-updateSyncStatusUI();
+        pendingRecords = await dbGetAll(STORE_PENDING);
+        cleanupOrphanBlobUrls();
+        updateSyncStatusUI();
 
-await loadSession();
-iniciarRealtime();
+        await loadSession();
+        iniciarRealtime();
 
-if (navigator.onLine && pendingRecords.length > 0) {
-  setTimeout(() => processPendingQueue(), 500);
-}
-
-// También reintentar cuando la PWA vuelva a primer plano
-      // También reintentar cuando la PWA vuelva a primer plano
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
-          processPendingQueue();
+        if (navigator.onLine && pendingRecords.length > 0) {
+          setTimeout(() => processPendingQueue(), 500);
         }
-      });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
+            processPendingQueue();
+          }
+        });
       } catch (error) {
         console.error("Error al iniciar la app:", error);
         document.getElementById('activeEmployeeName').textContent = "Error local";
       }
     });
-
-
 
     // ============================================================================
     // HANDLERS ONLINE / OFFLINE
@@ -1016,16 +636,8 @@ if (navigator.onLine && pendingRecords.length > 0) {
     async function handleOnlineEvent() {
         updateSyncStatusUI();
         iniciarRealtime();
-        if (employees.length === 0) {
-            await loadSession();
-        } else {
-            employees = await fetchEmployeesFromSupabase();
-            if (viewingUserId) {
-                updateUIForUser();
-                await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-            }
-        }
-        setTimeout(() => processPendingQueue(), 800);
+        await loadSession();
+        setTimeout(() => processPendingQueue(), 600);
     }
 
     function handleOfflineEvent() {
@@ -1057,43 +669,47 @@ if (navigator.onLine && pendingRecords.length > 0) {
 
         let successCount = 0;
 
-// 2. En processPendingQueue(), registrar el error exacto si Supabase rechaza la subida/inserción:
-for (const item of pending) {
-  try {
-    const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
-    const { error: uploadError } = await supabaseClient.storage
-      .from('registros-empleados')
-      .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
+        for (const item of pending) {
+            try {
+                if (employees.length > 0 && !employees.find(e => e.id === item.employeeId)) {
+                    await dbDelete(STORE_PENDING, item.localId);
+                    continue;
+                }
 
-    if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
+                const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('registros-empleados')
+                    .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
 
-    const { data: publicUrlData } = supabaseClient.storage
-      .from('registros-empleados')
-      .getPublicUrl(fileName);
+                if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
 
-    const { error: insertError } = await supabaseClient
-      .from('registros')
-      .insert([{
-        employee_id: item.employeeId,
-        tipo: item.type,
-        timestamp: item.timestamp,
-        fecha: item.date,
-        foto_url: publicUrlData.publicUrl,
-        ocr_nombre: item.ocrName || null,
-        ocr_fecha: item.ocrDate || null
-      }]);
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('registros-empleados')
+                    .getPublicUrl(fileName);
 
-    if (insertError) throw new Error(`DB insert: ${insertError.message}`);
+                const { error: insertError } = await supabaseClient
+                    .from('registros')
+                    .insert([{
+                        employee_id: item.employeeId,
+                        tipo: item.type,
+                        timestamp: item.timestamp,
+                        fecha: item.date,
+                        foto_url: publicUrlData.publicUrl,
+                        ocr_nombre: item.ocrName || null,
+                        ocr_fecha: item.ocrDate || null
+                    }]);
 
-    await dbDelete(STORE_PENDING, item.localId);
-    successCount++;
-  } catch (err) {
-    console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
-    item.lastError = err?.message || String(err);
-    await dbPut(STORE_PENDING, item);
-  }
-}
+                if (insertError) throw new Error(`DB insert: ${insertError.message}`);
 
+                await dbDelete(STORE_PENDING, item.localId);
+                successCount++;
+
+            } catch (err) {
+                console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
+                item.lastError = err?.message || String(err);
+                await dbPut(STORE_PENDING, item);
+            }
+        }
 
         isSyncing = false;
         await refreshPendingRecords();
@@ -1124,22 +740,22 @@ for (const item of pending) {
 
         if (!online) {
             syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-4 mb-2 rounded-2xl liquid-card border-amber-400/40 text-[11px] font-semibold overflow-hidden';
-            indicator.className = 'inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-300';
+            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
+            indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
             indicator.innerHTML = pendingCount > 0
                 ? `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}`
-                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Modo sin conexión`;
+                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · Modo local`;
             btnSync.classList.add('hidden');
         } else if (isSyncing) {
             syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-4 mb-2 rounded-2xl liquid-card border-purple-400/40 text-[11px] font-semibold overflow-hidden';
-            indicator.className = 'inline-flex items-center gap-1.5 text-purple-700 dark:text-purple-300';
+            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-blue-500/10 border-blue-500/20';
+            indicator.className = 'inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400';
             indicator.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5 animate-spin"></i> Sincronizando registros...`;
             btnSync.classList.add('hidden');
         } else if (pendingCount > 0) {
             syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-4 mb-2 rounded-2xl liquid-card border-amber-400/40 text-[11px] font-semibold overflow-hidden';
-            indicator.className = 'inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-300';
+            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
+            indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
             indicator.innerHTML = `<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> ${pendingCount} registro${pendingCount > 1 ? 's' : ''} por subir`;
             btnSync.classList.remove('hidden');
         } else {
@@ -1147,7 +763,7 @@ for (const item of pending) {
             btnSync.classList.add('hidden');
         }
 
-        lucide.createIcons({ root: syncBar });
+        if (window.lucide) lucide.createIcons({ root: syncBar });
     }
 
     // ============================================================================
@@ -1203,7 +819,7 @@ for (const item of pending) {
     }
 
     // ============================================================================
-    // EMPLEADOS (CON CACHÉ EN INDEXEDDB)
+    // EMPLEADOS (CON CACHÉ OFFLINE + RESPALDO LOCALSTORAGE)
     // ============================================================================
     async function fetchEmployeesFromSupabase() {
       if (navigator.onLine && supabaseClient) {
@@ -1221,47 +837,52 @@ for (const item of pending) {
               photoUrl: emp.foto_url || '',
               turnos: emp.turnos || {}
             }));
-            await setCachedData('empleados_list', mapped);
+            await setReadCache('empleados', mapped);
             return mapped;
           }
-          if (error) {
-            console.warn("No se pudo conectar a la Nube:", error.message);
-          }
+          console.warn("No se pudo conectar a la Nube:", error?.message);
         } catch (err) {
-          console.warn("Error de red al consultar Minisers, usando caché:", err);
+          console.warn("Error de red al consultar Minisers:", err);
         }
       }
 
-      const cached = await getCachedData('empleados_list');
+      const cached = await getReadCache('empleados');
       return Array.isArray(cached) ? cached : [];
+    }
+
+    async function precacheUserSchedules() {
+      if (!viewingUserId) return;
+      await loadTodayRecords();
+      await loadWeeklySchedule();
+      if (navigator.onLine && currentWeekOffset === 0) {
+        currentWeekOffset = -1;
+        await loadWeeklySchedule();
+        currentWeekOffset = 0;
+        await loadWeeklySchedule();
+      }
     }
 
     async function loadSession() {
       employees = await fetchEmployeesFromSupabase();
-      const savedSession = localStorage.getItem('sessionUserId');
 
+      if (employees.length === 0) {
+        document.getElementById('activeEmployeeName').textContent = navigator.onLine ? "Sin Minisers" : "Sin conexión";
+        document.getElementById('assignedShiftText').textContent = navigator.onLine ? "Turno asignado: --" : "Turno asignado: Sin caché de Minisers";
+        renderRecordsUI();
+        renderWeeklySchedule();
+        return;
+      }
+
+      const savedSession = localStorage.getItem('sessionUserId');
+      
       if (savedSession && employees.some(e => e.id == savedSession)) {
         sessionUserId = Number(savedSession);
         viewingUserId = sessionUserId;
         updateUIForUser();
-        await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-        return;
-      }
-
-      if (employees.length > 0) {
-        openInitialUserModal();
-        return;
-      }
-
-      if (!navigator.onLine) {
-        document.getElementById('activeEmployeeName').textContent = "Sin conexión";
-        document.getElementById('assignedShiftText').textContent = "Turno asignado: Sin datos en caché";
+        await precacheUserSchedules();
       } else {
-        document.getElementById('activeEmployeeName').textContent = "Sin Minisers";
-        document.getElementById('assignedShiftText').textContent = "Turno asignado: --";
+        openInitialUserModal();
       }
-      renderRecordsUI();
-      renderWeeklySchedule();
     }
 
     function openInitialUserModal() {
@@ -1269,29 +890,24 @@ for (const item of pending) {
       list.innerHTML = '';
 
       if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers en caché ni en la Nube.</p>';
+        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers disponibles.</p>';
       } else {
         employees.forEach(emp => {
-          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
-          const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-12 h-12 text-sm')" class="w-12 h-12 rounded-full object-cover shrink-0 ring-2 ring-white/80 dark:ring-white/20 shadow-sm">` 
-            : `<div class="w-12 h-12 rounded-full liquid-btn-primary text-white flex items-center justify-center font-bold text-sm uppercase shrink-0">${initial}</div>`;
-
           list.innerHTML += `
-            <div class="p-3.5 bg-white/80 dark:bg-white/10 border border-white/90 dark:border-white/15 rounded-2xl cursor-pointer hover:bg-white dark:hover:bg-white/15 transition-all flex items-center justify-between active:scale-[0.99] shadow-sm" onclick="selectInitialUser(${emp.id})">
+            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-all flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
               <div class="flex items-center gap-3.5">
-                ${avatar}
+                ${buildAvatarHTML(emp, 'w-12 h-12', 'text-sm')}
                 <div class="flex flex-col">
                   <span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span>
                   <span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span>
                 </div>
               </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-purple-500 dark:text-purple-300"></i>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i>
             </div>
           `;
         });
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       document.getElementById('modalInitialUser').classList.remove('hidden');
     }
 
@@ -1299,10 +915,20 @@ for (const item of pending) {
       sessionUserId = id;
       viewingUserId = id;
       localStorage.setItem('sessionUserId', sessionUserId);
-      closeAll();
+      if (Array.isArray(employees) && employees.length > 0) {
+        await setReadCache('empleados', employees);
+      }
       document.getElementById('modalInitialUser').classList.add('hidden');
       updateUIForUser();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+      await precacheUserSchedules();
+    }
+
+    async function logoutSession() {
+      closeAll();
+      localStorage.removeItem('sessionUserId');
+      sessionUserId = null;
+      viewingUserId = null;
+      openInitialUserModal();
     }
 
     function updateUIForUser() {
@@ -1311,12 +937,7 @@ for (const item of pending) {
       const avatarEl = document.getElementById('activeEmployeeAvatar');
       
       if (user) {
-        const initial = escapeHtml(user.name ? user.name.charAt(0) : '?');
-        const avatar = user.photoUrl 
-          ? `<img src="${escapeHtml(user.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-12 h-12 text-sm')" class="w-12 h-12 rounded-full object-cover shrink-0 ring-2 ring-white/80 dark:ring-white/20 shadow-md">` 
-          : `<div class="w-12 h-12 rounded-full liquid-btn-primary text-white flex items-center justify-center font-bold text-sm uppercase shrink-0">${initial}</div>`;
-        
-        avatarEl.innerHTML = avatar;
+        avatarEl.innerHTML = buildAvatarHTML(user, 'w-11 h-11', 'text-sm');
         nameEl.textContent = user.name;
       } else {
         avatarEl.innerHTML = '';
@@ -1369,7 +990,7 @@ for (const item of pending) {
     }
 
     // ============================================================================
-    // REGISTROS DEL DÍA (CON CACHÉ EN INDEXEDDB)
+    // REGISTROS DEL DÍA (CON CACHÉ OFFLINE)
     // ============================================================================
     async function loadTodayRecords() {
       if (!viewingUserId) {
@@ -1385,7 +1006,7 @@ for (const item of pending) {
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = null;
+      let serverRecords = [];
       if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
@@ -1407,16 +1028,16 @@ for (const item of pending) {
               ocrDate: r.ocr_fecha,
               isPending: false
             }));
-            await setCachedData(cacheKey, serverRecords);
+            await setReadCache(cacheKey, serverRecords);
+          } else {
+            serverRecords = (await getReadCache(cacheKey)) || [];
           }
         } catch (err) {
           console.error("Excepción al consultar registros del día:", err);
+          serverRecords = (await getReadCache(cacheKey)) || [];
         }
-      }
-
-      if (!Array.isArray(serverRecords)) {
-        const cached = await getCachedData(cacheKey);
-        serverRecords = Array.isArray(cached) ? cached : [];
+      } else {
+        serverRecords = (await getReadCache(cacheKey)) || [];
       }
 
       const pendingToday = pendingRecords
@@ -1439,11 +1060,96 @@ for (const item of pending) {
       renderRecordsUI();
     }
 
+    let customConfirmResolver = null;
+
+    function showCustomConfirm({
+      title = 'Confirmar acción',
+      message = '¿Deseas continuar?',
+      confirmText = 'Confirmar',
+      cancelText = 'Cancelar',
+      confirmColor = 'red',
+      cancelColor = 'green',
+      icon = 'alert-triangle'
+    } = {}) {
+      return new Promise((resolve) => {
+        customConfirmResolver = resolve;
+
+        const modal = document.getElementById('customConfirmModal');
+        const titleEl = document.getElementById('customConfirmTitle');
+        const textEl = document.getElementById('customConfirmText');
+        const iconContainer = document.getElementById('customConfirmIconContainer');
+        const iconEl = document.getElementById('customConfirmIcon');
+        const cancelBtn = document.getElementById('customConfirmCancelBtn');
+        const acceptBtn = document.getElementById('customConfirmAcceptBtn');
+
+        titleEl.textContent = title;
+        textEl.textContent = message;
+        cancelBtn.textContent = cancelText;
+        acceptBtn.textContent = confirmText;
+
+        const colorClasses = {
+          red: 'py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1',
+          green: 'py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1'
+        };
+
+        acceptBtn.className = colorClasses[confirmColor] || colorClasses.red;
+        cancelBtn.className = colorClasses[cancelColor] || colorClasses.green;
+
+        iconContainer.className = (confirmColor === 'green' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500') + ' flex justify-center mx-auto';
+        iconEl.setAttribute('data-lucide', icon);
+
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons({ root: modal });
+      });
+    }
+
+    function closeCustomConfirm(result) {
+      const modal = document.getElementById('customConfirmModal');
+      modal.classList.add('hidden');
+      if (customConfirmResolver) {
+        const resolve = customConfirmResolver;
+        customConfirmResolver = null;
+        resolve(result);
+      }
+    }
+
+    function showCustomAlert(message, type = 'error') {
+      const modal = document.getElementById('customAlertModal');
+      const textEl = document.getElementById('customAlertText');
+      const iconContainer = document.getElementById('customAlertIconContainer');
+      const iconEl = document.getElementById('customAlertIcon');
+
+      textEl.textContent = message;
+      if (type === 'success') {
+        iconContainer.className = 'text-emerald-600 dark:text-emerald-400 flex justify-center mx-auto';
+        iconEl.setAttribute('data-lucide', 'check-circle-2');
+      } else {
+        iconContainer.className = 'text-rose-500 flex justify-center mx-auto';
+        iconEl.setAttribute('data-lucide', 'alert-circle');
+      }
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons({ root: modal });
+    }
+
+    function closeCustomAlert() {
+      document.getElementById('customAlertModal').classList.add('hidden');
+    }
+
     async function deleteCurrentRecord() {
       if (!currentViewingRecordId) return;
 
       if (currentViewingIsPending) {
-        if (confirm('¿Deseas descartar este registro pendiente? No se subirá a la nube.')) {
+        const confirmed = await showCustomConfirm({
+          title: 'Descartar registro pendiente',
+          message: '¿Deseas descartar este registro pendiente? No se subirá a la nube.',
+          confirmText: 'Descartar',
+          cancelText: 'Cancelar',
+          confirmColor: 'red',
+          cancelColor: 'green',
+          icon: 'trash-2'
+        });
+        if (confirmed) {
           await dbDelete(STORE_PENDING, currentViewingRecordId);
           currentViewingIsPending = false;
           currentViewingRecordId = null;
@@ -1454,17 +1160,26 @@ for (const item of pending) {
         }
       } else {
         if (!navigator.onLine || !supabaseClient) {
-          alert('Sin conexión. No se puede eliminar un registro ya subido hasta recuperar la conexión.');
+          showCustomAlert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
           return;
         }
-        if (confirm('¿Deseas eliminar este registro de la nube?')) {
+        const confirmed = await showCustomConfirm({
+          title: 'Eliminar registro',
+          message: '¿Deseas eliminar este registro de la nube?',
+          confirmText: 'Eliminar',
+          cancelText: 'Cancelar',
+          confirmColor: 'red',
+          cancelColor: 'green',
+          icon: 'trash-2'
+        });
+        if (confirmed) {
           const { error } = await supabaseClient
             .from('registros')
             .delete()
             .eq('id', currentViewingRecordId);
 
           if (error) {
-            alert('No se pudo eliminar el registro: ' + error.message);
+            showCustomAlert('No se pudo eliminar el registro: ' + error.message);
           } else {
             currentViewingRecordId = null;
             closeAll();
@@ -1512,11 +1227,11 @@ for (const item of pending) {
 
         let leftIcon;
         if (record && isPending) {
-          leftIcon = `<div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 text-amber-500 bg-amber-500/15 border border-amber-400/30"><i data-lucide="cloud-upload" class="w-5 h-5"></i></div>`;
+          leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-amber-500 bg-transparent"><i data-lucide="cloud-upload" class="w-6 h-6"></i></div>`;
         } else if (record) {
-          leftIcon = `<div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-400/30"><i data-lucide="check-circle" class="w-5 h-5"></i></div>`;
+          leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-emerald-500 bg-transparent"><i data-lucide="check-circle" class="w-6 h-6"></i></div>`;
         } else {
-          leftIcon = `<div class="w-10 h-10 rounded-2xl ${canRegister ? 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-400/30' : 'text-app-sub dark:text-darkapp-sub liquid-pill'} flex items-center justify-center shrink-0 font-bold text-sm">${index + 1}</div>`;
+          leftIcon = `<div class="w-10 h-10 rounded-full ${canRegister ? 'bg-app-brand/10 text-app-brand dark:bg-teal-500/20 dark:text-teal-400' : 'text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/50'} flex items-center justify-center shrink-0 font-bold text-sm">${index + 1}</div>`;
         }
 
         let imgSrc = record && record.photo ? escapeHtml(record.photo) : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
@@ -1524,11 +1239,11 @@ for (const item of pending) {
         let rightAction;
         if (record) {
           rightAction = `<div class="relative flex items-center gap-2">
-               <img src="${imgSrc}" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-2xl object-cover cursor-pointer border-2 ${isPending ? 'border-amber-400' : 'border-white/80 dark:border-white/25'} shadow-md bg-white/50">
+               <img src="${imgSrc}" onerror="this.classList.add('opacity-40');" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
                ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
              </div>`;
         } else if (canRegister) {
-          rightAction = `<button onclick="triggerFileInput(${index})" class="liquid-btn-primary px-3.5 py-2 rounded-full font-bold text-[12px] flex items-center gap-1.5 cursor-pointer"><i data-lucide="camera" class="w-3.5 h-3.5"></i> Registrar</button>`;
+          rightAction = `<button type="button" onclick="this.blur(); triggerFileInput(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
         } else {
           rightAction = '';
         }
@@ -1537,20 +1252,20 @@ for (const item of pending) {
           ? (isPending 
               ? `${formatTime(record.timestamp)} · <span class="text-amber-600 dark:text-amber-400 font-semibold">Pendiente de subir</span>`
               : formatTime(record.timestamp))
-          : (canRegister ? 'Toma una foto' : 'Pendiente');
+          : (canRegister ? ' ' : 'Pendiente');
 
         list.innerHTML += `
-          <div class="liquid-card rounded-2xl p-3 flex items-center gap-3.5 transition-all">
+          <div class="flex items-center gap-4 py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
             ${leftIcon}
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-[14px] ${canRegister ? 'text-purple-700 dark:text-purple-300' : 'text-app-title dark:text-darkapp-title'} truncate">${type.label}</h4>
-              <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-0.5 font-medium">${subtitle}</p>
+            <div class="flex-1">
+              <h4 class="font-bold text-[15px] ${canRegister ? 'text-app-brand dark:text-teal-400' : 'text-app-title dark:text-darkapp-title'}">${type.label}</h4>
+              <p class="text-[12px] text-app-sub dark:text-darkapp-sub mt-0.5">${subtitle}</p>
             </div>
             ${rightAction}
           </div>
         `;
       });
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateStatusBadge() {
@@ -1571,16 +1286,16 @@ for (const item of pending) {
       } else if (hasLunchOut && !hasLunchIn) {
         text = 'EN COMIDA';
         icon = 'utensils';
-        colorClass = 'text-purple-600 dark:text-purple-300';
+        colorClass = 'text-teal-600 dark:text-teal-400';
       } else if (hasEntry || (hasLunchOut && hasLunchIn)) {
         text = 'EN TURNO';
         icon = 'check-circle';
-        colorClass = 'text-purple-600 dark:text-purple-300';
+        colorClass = 'text-app-brand dark:text-teal-400';
       }
 
-      badge.className = `inline-flex items-center gap-1.5 font-bold text-[11px] mt-1 ${colorClass}`;
+      badge.className = `flex items-center gap-1.5 font-semibold text-xs mt-1 ${colorClass}`;
       badge.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> <span>${text}</span>`;
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateShiftTime() {
@@ -1595,7 +1310,7 @@ for (const item of pending) {
     }
 
     // ============================================================================
-    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN (CON CACHÉ EN INDEXEDDB)
+    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN
     // ============================================================================
     function getWeekData(offset) {
       const now = new Date();
@@ -1648,13 +1363,13 @@ for (const item of pending) {
       const start12 = formatTime24To12Short(sched.startTime);
       const end12 = sched.endTime ? formatTime24To12Short(sched.endTime) : '';
       const formatted = end12 ? `${start12} - ${end12}` : start12;
-      return { text: formatted, badgeClass: 'bg-purple-500/15 text-purple-700 font-bold px-3 py-1.5 rounded-xl text-sm' };
+      return { text: formatted, badgeClass: 'bg-teal-500/10 text-teal-700 font-bold px-3 py-1.5 rounded-md text-sm' };
     }
 
     async function downloadEmployeeScheduleImage() {
-      const targetUserId = sessionUserId || viewingUserId;
+      const targetUserId = viewingUserId || sessionUserId;
       const emp = employees.find(e => e.id === targetUserId);
-      if (!emp) return;
+      if (!emp || typeof html2canvas === 'undefined') return;
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const rangeOptions = { day: 'numeric', month: 'short' };
@@ -1682,7 +1397,7 @@ for (const item of pending) {
         const monthShort = targetDate.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
 
         exportDaysHTML += `
-          <div class="grid grid-cols-12 items-center py-3.5 px-5 bg-white/75 rounded-2xl border border-white shadow-sm mb-2">
+          <div class="grid grid-cols-12 items-center py-4 px-5 bg-slate-50/80 rounded-2xl border border-slate-200 mb-3">
             <div class="col-span-4 flex items-center">
               <span class="text-base font-bold text-slate-900">${dayName}</span>              
             </div>
@@ -1703,7 +1418,7 @@ for (const item of pending) {
         const canvas = await html2canvas(exportContainer, {
           scale: 3,
           useCORS: true,
-          backgroundColor: '#E8EFFD'
+          backgroundColor: '#ffffff'
         });
 
         const imageURL = canvas.toDataURL('image/png');
@@ -1729,7 +1444,7 @@ for (const item of pending) {
     }
 
     async function loadWeeklySchedule() {
-      const targetUserId = sessionUserId || viewingUserId;
+      const targetUserId = viewingUserId || sessionUserId;
       if (!targetUserId) {
         weekRecords = [];
         renderWeeklySchedule();
@@ -1744,7 +1459,7 @@ for (const item of pending) {
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = null;
+      let serverRecords = [];
       if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
@@ -1764,16 +1479,16 @@ for (const item of pending) {
               date: r.fecha,
               isPending: false
             }));
-            await setCachedData(cacheKey, serverRecords);
+            await setReadCache(cacheKey, serverRecords);
+          } else {
+            serverRecords = (await getReadCache(cacheKey)) || [];
           }
         } catch (err) {
           console.error("Excepción al consultar registros semanales:", err);
+          serverRecords = (await getReadCache(cacheKey)) || [];
         }
-      }
-
-      if (!Array.isArray(serverRecords)) {
-        const cached = await getCachedData(cacheKey);
-        serverRecords = Array.isArray(cached) ? cached : [];
+      } else {
+        serverRecords = (await getReadCache(cacheKey)) || [];
       }
 
       const pendingInRange = pendingRecords
@@ -1794,7 +1509,7 @@ for (const item of pending) {
     }
 
     function renderWeeklySchedule() {
-      const targetUserId = sessionUserId || viewingUserId;
+      const targetUserId = viewingUserId || sessionUserId;
       const emp = employees.find(e => e.id === targetUserId);
       const container = document.getElementById('weeklyScheduleContainer');
       if (!container) return;
@@ -1808,15 +1523,15 @@ for (const item of pending) {
 
       if (currentWeekOffset === 0) {
         document.getElementById('weekLabel').textContent = 'Semana Actual';
-        btnPrev.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-purple-600 dark:hover:text-purple-300 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors cursor-pointer';
+        btnPrev.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
         btnPrev.disabled = false;
-        btnNext.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-xl cursor-not-allowed';
+        btnNext.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
         btnNext.disabled = true;
       } else if (currentWeekOffset === -1) {
         document.getElementById('weekLabel').textContent = 'Semana Anterior';
-        btnPrev.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-xl cursor-not-allowed';
+        btnPrev.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
         btnPrev.disabled = true;
-        btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-purple-600 dark:hover:text-purple-300 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors cursor-pointer';
+        btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
         btnNext.disabled = false;
       }
 
@@ -1848,10 +1563,10 @@ for (const item of pending) {
         const isNonWorkDay = upperShift !== '' && NON_WORK_SHIFTS.includes(upperShift);
         const lunchOutRec = dayRecords.find(r => r.type === 'lunch_out');
 
-        const greenClass = 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-400/30';
-        const orangeClass = 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-400/30';
-        const redClass = 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-400/30';
-        const neutralClass = 'bg-white/40 dark:bg-white/5 text-app-sub dark:text-darkapp-sub border border-white/50 dark:border-white/10';
+        const greenClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+        const orangeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+        const redClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+        const neutralClass = 'bg-app-bg/50 dark:bg-slate-800/50 text-app-sub dark:text-darkapp-sub';
 
         let cellsHTML = '';
 
@@ -1941,13 +1656,13 @@ for (const item of pending) {
                 ? ` <i data-lucide="cloud-upload" class="w-2.5 h-2.5 inline text-amber-500"></i>` 
                 : '';
 
-              return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} ${rec.isPending ? 'ring-1 ring-amber-400' : ''} px-1.5 py-1 rounded-xl text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer backdrop-blur-sm" title="${title}">${displayTime}${pendingMark}</button>`;
+              return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} ${rec.isPending ? 'ring-1 ring-amber-400 dark:ring-amber-500' : ''} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer" title="${title}">${displayTime}${pendingMark}</button>`;
             } else {
               if (isPastDay && !isNonWorkDay) {
                 bgClass = redClass;
               } 
 
-              return `<div class="${bgClass} px-1.5 py-1 rounded-xl text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
+              return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
             }
           }).join('');
         }
@@ -1956,14 +1671,14 @@ for (const item of pending) {
         if (sched && sched.startTime) {
           const st = String(sched.startTime).toUpperCase();
           if (st === 'LIBRE') {
-            shiftLabel = '<span class="text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/60 dark:border-white/10">Descanso</span>';
+            shiftLabel = '<span class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Descanso</span>';
           } else if (st === 'VACACIONES') {
-            shiftLabel = '<span class="text-[10px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-500/15 px-2.5 py-0.5 rounded-lg border border-purple-400/25">Vacaciones</span>';
+            shiftLabel = '<span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Vacaciones</span>';
           } else if (st.startsWith('CAPAC')) {
-            shiftLabel = '<span class="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-400/25">Capacitación</span>';
+            shiftLabel = '<span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">Capacitación</span>';
           } else {
             const t = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
-            shiftLabel = `<span class="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-500/15 px-2.5 py-0.5 rounded-lg border border-purple-400/25">${t}</span>`;
+            shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${escapeHtml(t)}</span>`;
           }
         } else {
           shiftLabel = '<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">Sin horario</span>';
@@ -1976,7 +1691,7 @@ for (const item of pending) {
              </div>`;
 
         daysHTML += `
-          <div class="flex flex-col py-3 border-b border-white/50 dark:border-white/10 last:border-0">
+          <div class="flex flex-col py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
             <div class="flex items-center justify-between ${bottomRowHTML ? 'mb-1.5' : ''}">
               <div class="flex items-center gap-2">
                 <p class="text-[11px] font-bold text-app-title dark:text-darkapp-title w-16">${dayName}</p>
@@ -1990,15 +1705,32 @@ for (const item of pending) {
       });
 
       container.innerHTML = daysHTML;
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     // ============================================================================
     // CAPTURA DE FOTO + OCR + GUARDADO
     // ============================================================================
     function triggerFileInput(index) {
-      currentCheckIndexToCapture = index;
-      document.getElementById('cameraInput').click();
+      try {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        if (!viewingUserId) {
+          alert('Selecciona un usuario antes de registrar una checada.');
+          return;
+        }
+        const input = document.getElementById('cameraInput');
+        if (!input) {
+          throw new Error('No se encontró el campo de selección de foto.');
+        }
+        currentCheckIndexToCapture = index;
+        input.value = '';
+        input.click();
+      } catch (err) {
+        console.error('Error al abrir la cámara/selector:', err);
+        alert('No se pudo abrir la cámara o selector de foto: ' + (err?.message || err));
+      }
     }
 
     async function resizeImage(file, maxWidth = 1200) {
@@ -2069,6 +1801,15 @@ for (const item of pending) {
       this.value = ''; 
     });
 
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('No se pudo convertir el Blob a DataURL'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
     async function handleSelectedFile(file) {
       if (!file) return;
 
@@ -2088,11 +1829,7 @@ for (const item of pending) {
         if (navigator.onLine && typeof Tesseract !== 'undefined') {
           loaderText.textContent = "Analizando con OCR...";
           try {
-            const reader = new FileReader();
-            const base64Data = await new Promise((res) => {
-              reader.onload = (e) => res(e.target.result);
-              reader.readAsDataURL(imageBlob);
-            });
+            const base64Data = await blobToDataUrl(imageBlob);
 
             worker = await Tesseract.createWorker('spa');
             const ret = await worker.recognize(base64Data);
@@ -2113,8 +1850,22 @@ for (const item of pending) {
         loaderText.textContent = navigator.onLine ? "Guardando registro..." : "Guardando sin conexión...";
         await saveRecord(imageBlob, detectedName, detectedDate);
         
-        const previewUrl = URL.createObjectURL(imageBlob);
-        document.getElementById('ocrPreviewImage').src = previewUrl;
+        if (ocrPreviewBlobUrl) {
+          URL.revokeObjectURL(ocrPreviewBlobUrl);
+          ocrPreviewBlobUrl = null;
+        }
+        const previewImg = document.getElementById('ocrPreviewImage');
+        const previewDataUrl = await blobToDataUrl(imageBlob);
+        previewImg.onload = null;
+        previewImg.onerror = () => {
+          previewImg.onerror = null;
+          if (!ocrPreviewBlobUrl) {
+            ocrPreviewBlobUrl = URL.createObjectURL(imageBlob);
+          }
+          previewImg.src = ocrPreviewBlobUrl;
+        };
+        previewImg.src = previewDataUrl;
+
         document.getElementById('resName').textContent = detectedName || (employees.find(e => e.id === viewingUserId)?.name || 'Usuario Actual');
         
         const now = new Date();
@@ -2211,7 +1962,9 @@ for (const item of pending) {
       currentViewingRecordId = id;
       currentViewingIsPending = !!isPending;
       
-      document.getElementById('photoViewer').src = photoUrl;
+      const viewer = document.getElementById('photoViewer');
+      viewer.classList.remove('opacity-40');
+      viewer.src = photoUrl;
       
       const rec = todayRecords.find(r => r.id == id);
       const resultDiv = document.getElementById('ocrResultData');
@@ -2239,7 +1992,6 @@ for (const item of pending) {
       const menu = document.getElementById('settingsMenu');
       const overlay = document.getElementById('overlay');
       if (menu.classList.contains('hidden')) {
-        closeAll();
         menu.classList.remove('hidden');
         overlay.classList.remove('hidden');
       } else {
@@ -2249,6 +2001,7 @@ for (const item of pending) {
 
     function openModal(id) {
       closeAll();
+      document.getElementById('overlay').classList.add('hidden');
       document.getElementById(id).classList.remove('hidden');
     }
 
@@ -2256,9 +2009,14 @@ for (const item of pending) {
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('settingsMenu').classList.add('hidden');
       document.getElementById('modalSwitchUser').classList.add('hidden');
-      document.getElementById('modalRefreshConfirm').classList.add('hidden');
       document.getElementById('modalPhoto').classList.add('hidden');
       document.getElementById('modalOCRResult').classList.add('hidden');
+      document.getElementById('customConfirmModal').classList.add('hidden');
+      document.getElementById('customAlertModal').classList.add('hidden');
+      if (ocrPreviewBlobUrl) {
+        URL.revokeObjectURL(ocrPreviewBlobUrl);
+        ocrPreviewBlobUrl = null;
+      }
     }
 
     async function openSwitchUserModal() {
@@ -2268,41 +2026,54 @@ for (const item of pending) {
       const list = document.getElementById('switchUserList');
       list.innerHTML = '';
       
-      if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay Minisers disponibles.</p>';
+      const otherUsers = employees.filter(emp => emp.id !== sessionUserId);
+      
+      if (otherUsers.length === 0) {
+        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay otros Minisers registrados en el sistema.</p>';
       } else {
-        employees.forEach(emp => {
-          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
-          const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-10 h-10 text-xs')" class="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white/80 dark:ring-white/20">` 
-            : `<div class="w-10 h-10 rounded-full liquid-btn-primary text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">${initial}</div>`;
-
+        otherUsers.forEach(emp => {
           list.innerHTML += `
-            <div class="p-3 bg-white/80 dark:bg-white/10 border border-white/90 dark:border-white/15 rounded-2xl cursor-pointer hover:bg-white dark:hover:bg-white/15 transition-all flex items-center justify-between active:scale-[0.99] shadow-sm" onclick="selectInitialUser(${emp.id})">
+            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})">
               <div class="flex items-center gap-3">
-                ${avatar}
+                ${buildAvatarHTML(emp, 'w-10 h-10', 'text-xs')}
                 <div class="flex flex-col">
                   <span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span>
                   <span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span>
                 </div>
               </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-purple-500 dark:text-purple-300"></i>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i>
             </div>
           `;
         });
       }
       
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       openModal('modalSwitchUser');
     }
 
-    function clearLocalStorage() {
-      openModal('modalRefreshConfirm');
+    async function switchViewingUser(id) {
+      viewingUserId = id;
+      updateUIForUser();
+      await precacheUserSchedules();
+      closeAll();
     }
 
-    function confirmRefreshLocalStorage() {
-      localStorage.removeItem('sessionUserId');
-      window.location.reload();
+    async function clearLocalStorage() {
+      document.getElementById('settingsMenu').classList.add('hidden');
+      document.getElementById('overlay').classList.add('hidden');
+      const confirmed = await showCustomConfirm({
+        title: '¿Refrescar sesión local?',
+        message: 'Los registros pendientes en la memoria NO se perderán.',
+        confirmText: 'Refrescar',
+        cancelText: 'Cancelar',
+        confirmColor: 'green',
+        cancelColor: 'red',
+        icon: 'refresh-cw'
+      });
+      if (confirmed) {
+        localStorage.removeItem('sessionUserId');
+        window.location.reload();
+      }
     }
 
     // ============================================================================
